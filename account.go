@@ -1,5 +1,7 @@
 package accounts
 
+//go:generate go-bindata -pkg migrations -o migrations/generated.go sql/
+
 import (
 	"context"
 	"errors"
@@ -12,11 +14,15 @@ var (
 )
 
 type Account struct {
-	ID        string
-	ProfileID string
-	Created   time.Time
-	LastUsed  time.Time
-	LastSeen  time.Time
+	ID        string    `sql_column:"id"`
+	ProfileID string    `sql_column:"profile_id"`
+	Created   time.Time `sql_column:"created_at"`
+	LastUsed  time.Time `sql_column:"last_used_at"`
+	LastSeen  time.Time `sql_column:"last_seen_at"`
+}
+
+func (a Account) GetSQLTableName() string {
+	return "accounts"
 }
 
 type Change struct {
