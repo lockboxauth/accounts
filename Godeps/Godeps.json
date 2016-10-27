@@ -7,9 +7,32 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "bitbucket.org/ww/goautoneg",
+			"Comment": "null-5",
+			"Rev": "'75cd24fc2f2c2a2088577d12123ddee5f54e0675'"
+		},
+		{
+			"ImportPath": "darlinggo.co/api",
+			"Rev": "06eb95038fc22f9f9d339b001450d5a4902ecd23"
+		},
+		{
+			"ImportPath": "darlinggo.co/healthcheck",
+			"Comment": "v0.1.0-3-g2782d97",
+			"Rev": "2782d970aa97d76e562db638800fd9e41c578ed9"
+		},
+		{
 			"ImportPath": "darlinggo.co/pan",
 			"Comment": "v0.1.0-1-gfff7af8",
 			"Rev": "fff7af8f1e4c8d005ac22f7ec23e4937cc698a26"
+		},
+		{
+			"ImportPath": "darlinggo.co/trout",
+			"Rev": "38be48e603bbeaa4d0e9c5d38e265c228b1f8b35"
+		},
+		{
+			"ImportPath": "darlinggo.co/version",
+			"Comment": "v1.0.0-1-gf3ee4b7",
+			"Rev": "f3ee4b785ab6b889b50983a1f34bf1febcaaee32"
 		},
 		{
 			"ImportPath": "github.com/lib/pq",
