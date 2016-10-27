@@ -5,14 +5,21 @@ package accounts
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 )
 
 var (
-	ErrAccountNotFound      = errors.New("account not found")
+	// ErrAccountNotFound is returned when an Account was expected but could not be found.
+	ErrAccountNotFound = errors.New("account not found")
+	// ErrAccountAlreadyExists is returned when attempting to create an Account that already exists.
 	ErrAccountAlreadyExists = errors.New("account already exists")
 )
 
+// Account is a representation of a user's identifier. It maps
+// the identifier (email, username, whatever) to a profile ID,
+// allowing users to have multiple identifiers that are all
+// interchangeable.
 type Account struct {
 	ID        string    `sql_column:"id"`
 	ProfileID string    `sql_column:"profile_id"`
@@ -21,15 +28,22 @@ type Account struct {
 	LastSeen  time.Time `sql_column:"last_seen_at"`
 }
 
+// GetSQLTableName returns the name of the SQL table that
+// the Accounts should be stored in; it is necessary for us
+// to use pan with our Accounts.
 func (a Account) GetSQLTableName() string {
 	return "accounts"
 }
 
+// Change represents a requested change to one or more of an
+// Account's mutable properties.
 type Change struct {
 	LastUsed *time.Time
 	LastSeen *time.Time
 }
 
+// IsEmpty returns true if the Change would not result in a
+// change, no matter which Account it was applied to.
 func (c Change) IsEmpty() bool {
 	if c.LastUsed != nil {
 		return false
@@ -40,6 +54,8 @@ func (c Change) IsEmpty() bool {
 	return true
 }
 
+// Apply returns a copy of the specified Account with the
+// changes requested by the specified Change applied.
 func Apply(change Change, account Account) Account {
 	if change.IsEmpty() {
 		return account
@@ -54,6 +70,8 @@ func Apply(change Change, account Account) Account {
 	return res
 }
 
+// Storer dictates how Accounts will be persisted and how to
+// interact with those persisted Accounts.
 type Storer interface {
 	Create(ctx context.Context, account Account) error
 	Get(ctx context.Context, id string) (Account, error)
@@ -61,6 +79,10 @@ type Storer interface {
 	Delete(ctx context.Context, id string) error
 }
 
+// FillDefaults sets a reasonable default for any of the properties
+// of the specified Account that both have reasonable defaults and
+// are set to the zero value when FillDefaults is called. It returns
+// a copy of the specified Account with those defaults applied.
 func FillDefaults(account Account) Account {
 	res := account
 	if res.Created.IsZero() {
@@ -73,4 +95,12 @@ func FillDefaults(account Account) Account {
 		res.LastSeen = res.LastUsed
 	}
 	return res
+}
+
+// Dependencies holds all the information that we want to make available
+// to all our functions, but that are orthogonal enough to not warrant
+// their own place in every function's signature.
+type Dependencies struct {
+	Storer Storer
+	Log    *log.Logger
 }
