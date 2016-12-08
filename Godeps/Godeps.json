@@ -35,6 +35,18 @@
 			"Rev": "f3ee4b785ab6b889b50983a1f34bf1febcaaee32"
 		},
 		{
+			"ImportPath": "github.com/hashicorp/go-immutable-radix",
+			"Rev": "afc5a0dbb18abdf82c277a7bc01533e81fa1d6b8"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/go-memdb",
+			"Rev": "98f52f52d7a476958fa9da671354d270c50661a7"
+		},
+		{
+			"ImportPath": "github.com/hashicorp/golang-lru/simplelru",
+			"Rev": "0a025b7e63adc15a622f29b0b2c4c3848243bbf6"
+		},
+		{
 			"ImportPath": "github.com/lib/pq",
 			"Comment": "go1.0-cutoff-111-g80f8150",
 			"Rev": "80f8150043c80fb52dee6bc863a709cdac7ec8f8"
