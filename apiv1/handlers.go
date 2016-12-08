@@ -97,7 +97,7 @@ func (a APIv1) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	vars := trout.RequestVars(r)
 	id := vars.Get("id")
 	if id == "" {
-		api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Param: "/id", Slug: api.RequestErrNotFound}}})
+		api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Param: "id", Slug: api.RequestErrNotFound}}})
 		return
 	}
 	account, err := a.Storer.Get(r.Context(), id)
@@ -117,4 +117,19 @@ func (a APIv1) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	api.Encode(w, r, http.StatusOK, Response{Accounts: []Account{apiAccount(account)}})
+}
+
+func (a APIv1) handleListAccounts(w http.ResponseWriter, r *http.Request) {
+	profileID := r.URL.Query().Get("profileID")
+	if profileID == "" {
+		api.Encode(w, r, http.StatusBadRequest, Response{Errors: []api.RequestError{{Param: "profileID", Slug: api.RequestErrMissing}}})
+		return
+	}
+	accts, err := a.Storer.ListByProfile(r.Context(), profileID)
+	if err != nil {
+		a.Log.Printf("Error retrieving accounts for %s: %+v\n", profileID, err)
+		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
+		return
+	}
+	api.Encode(w, r, http.StatusOK, Response{Accounts: apiAccounts(accts)})
 }
