@@ -41,3 +41,12 @@ func deleteSQL(ctx context.Context, id string) *pan.Query {
 	q.Comparison(account, "ID", "=", id)
 	return q.Flush(" ")
 }
+
+func listByProfileSQL(ctx context.Context, profileID string) *pan.Query {
+	var account accounts.Account
+	q := pan.New("SELECT " + pan.Columns(account).String() + " FROM " + pan.Table(account))
+	q.Where()
+	q.Comparison(account, "ProfileID", "=", profileID)
+	q.OrderByDesc("last_used_at")
+	return q.Flush(" ")
+}

@@ -186,6 +186,46 @@ func TestCreateMultipleAccounts(t *testing.T) {
 	})
 }
 
+func TestListAccountsByProfile(t *testing.T) {
+	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
+		account := accounts.Account{
+			ID:        "paddy@impractical.co",
+			ProfileID: uuid.NewRandom().String(),
+			Created:   time.Now().Round(time.Millisecond),
+			LastUsed:  time.Now().Round(time.Millisecond),
+			LastSeen:  time.Now().Round(time.Millisecond),
+		}
+		err := storer.Create(ctx, account)
+		if err != nil {
+			t.Fatalf("Unexpected error creating account: %+v\n", err)
+		}
+		account2 := account
+		account2.ID = "paddy@impracticallabs.com"
+		account2.LastUsed = account2.LastUsed.Add(-1 * time.Minute)
+		err = storer.Create(ctx, account2)
+		if err != nil {
+			t.Fatalf("Unexpected error creating account: %+v\n", err)
+		}
+
+		accounts, err := storer.ListByProfile(ctx, account.ProfileID)
+		if err != nil {
+			t.Fatalf("Unexpected error listing accounts: %+v\n", err)
+		}
+
+		if len(accounts) != 2 {
+			t.Fatalf("Expected %d accounts, got %d: %+v\n", 2, len(accounts), accounts)
+		}
+		ok, field, exp, res := compareAccounts(accounts[0], account)
+		if !ok {
+			t.Errorf("Expected %s to be %v for %s, got %v\n", field, exp, account.ID, res)
+		}
+		ok, field, exp, res = compareAccounts(accounts[1], account2)
+		if !ok {
+			t.Errorf("Expected %s to be %v for %s, got %v\n", field, exp, account2.ID, res)
+		}
+	})
+}
+
 func TestUpdateOneOfMany(t *testing.T) {
 	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
 		for i := 1; i < changeVariations; i++ {

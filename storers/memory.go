@@ -17,11 +17,11 @@ var (
 					"id": &memdb.IndexSchema{
 						Name:    "id",
 						Unique:  true,
-						Indexer: &memdb.StringFieldIndex{Field: "ID"},
+						Indexer: &memdb.StringFieldIndex{Field: "ID", Lowercase: true},
 					},
 					"profileID": &memdb.IndexSchema{
 						Name:    "profileID",
-						Indexer: &memdb.StringFieldIndex{Field: "ProfileID"},
+						Indexer: &memdb.StringFieldIndex{Field: "ProfileID", Lowercase: true},
 					},
 				},
 			},
@@ -124,4 +124,24 @@ func (m *Memstore) Delete(ctx context.Context, id string) error {
 	}
 	txn.Commit()
 	return nil
+}
+
+// ListByProfile returns all the Accounts associated with the passed profile ID,
+// sorted with the most recently used Accounts coming first.
+func (m *Memstore) ListByProfile(ctx context.Context, profileID string) ([]accounts.Account, error) {
+	txn := m.db.Txn(false)
+	var accts []accounts.Account
+	acctIter, err := txn.Get("account", "profileID", profileID)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		acct := acctIter.Next()
+		if acct == nil {
+			break
+		}
+		accts = append(accts, *acct.(*accounts.Account))
+	}
+	accounts.ByLastUsedDesc(accts)
+	return accts, nil
 }

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"sort"
 	"time"
 )
 
@@ -77,6 +78,7 @@ type Storer interface {
 	Get(ctx context.Context, id string) (Account, error)
 	Update(ctx context.Context, id string, change Change) error
 	Delete(ctx context.Context, id string) error
+	ListByProfile(ctx context.Context, profileID string) ([]Account, error)
 }
 
 // FillDefaults sets a reasonable default for any of the properties
@@ -103,4 +105,18 @@ func FillDefaults(account Account) Account {
 type Dependencies struct {
 	Storer Storer
 	Log    *log.Logger
+}
+
+type byLastUsedDesc []Account
+
+func (b byLastUsedDesc) Less(i, j int) bool { return b[i].LastUsed.After(b[j].LastUsed) }
+
+func (b byLastUsedDesc) Swap(i, j int) { b[i], b[j] = b[j], b[i] }
+
+func (b byLastUsedDesc) Len() int { return len(b) }
+
+// ByLastUsedDesc sorts the passed slice of Accounts by their LastUsed
+// property, with the most recent times at the lower indices.
+func ByLastUsedDesc(accounts []Account) {
+	sort.Sort(byLastUsedDesc(accounts))
 }

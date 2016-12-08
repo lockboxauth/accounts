@@ -102,3 +102,31 @@ func (p *Postgres) Delete(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
+// ListByProfile returns all the Accounts associated with the passed profile ID,
+// sorted with the most recently used Accounts coming first.
+func (p *Postgres) ListByProfile(ctx context.Context, profileID string) ([]accounts.Account, error) {
+	query := listByProfileSQL(ctx, profileID)
+	queryStr, err := query.PostgreSQLString()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := p.db.Query(queryStr, query.Args()...)
+	if err != nil {
+		return nil, err
+	}
+	var accts []accounts.Account
+	for rows.Next() {
+		var account accounts.Account
+		err = pan.Unmarshal(rows, &account)
+		if err != nil {
+			return accts, err
+		}
+		accts = append(accts, account)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	accounts.ByLastUsedDesc(accts)
+	return accts, nil
+}
