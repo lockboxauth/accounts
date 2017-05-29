@@ -5,9 +5,10 @@ package accounts
 import (
 	"context"
 	"errors"
-	"log"
 	"sort"
 	"time"
+
+	"github.com/apex/log"
 )
 
 var (
