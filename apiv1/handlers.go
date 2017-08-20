@@ -12,7 +12,7 @@ func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	var body Account
 	err := api.Decode(r, &body)
 	if err != nil {
-		a.Log.WithError(err).Info("Error decoding request body")
+		a.Log.WithError(err).Debug("Error decoding request body")
 		api.Encode(w, r, http.StatusBadRequest, Response{Errors: api.InvalidFormatError})
 		return
 	}
@@ -73,7 +73,7 @@ func (a APIv1) handleUpdateAccount(w http.ResponseWriter, r *http.Request) {
 	var body Change
 	err := api.Decode(r, &body)
 	if err != nil {
-		a.Log.WithError(err).Info("Error decoding request")
+		a.Log.WithError(err).Debug("Error decoding request")
 		api.Encode(w, r, http.StatusBadRequest, Response{Errors: api.InvalidFormatError})
 		return
 	}

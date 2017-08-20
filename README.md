@@ -1,6 +1,6 @@
 # accounts
 
-The `accounts` package encapsulates the part of the [auth system](https://code.impractical.co/auth) that maps the method a user logged in with to the identifier used in our systems to represent that user.
+The `accounts` package encapsulates the part of the [auth system](https://impractical.co/auth) that maps the method a user logged in with to the identifier used in our systems to represent that user.
 
 Put another way, it helps tie usernames, email addresses, Google accounts, and any future ways to login we may want to support into a single logical unit that we can think of as "a user".
 
@@ -30,7 +30,7 @@ The questions `accounts` is meant to answer for the system include:
 
 The things `accounts` is explicitly not expected to do include:
 
-  * Actually authenticate users. That is handled by the [`grants` package](httpps://code.impractical.co/grants).
+  * Actually authenticate users. That is handled by the [`grants` package](httpps://impractical.co/auth/grants).
   * Sending any emails.
   * Managing ACLs.
   * Managing user profile information.
