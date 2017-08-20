@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"impractical.co/auth/accounts"
+	"github.com/hashicorp/go-uuid"
 
-	"github.com/pborman/uuid"
+	"impractical.co/auth/accounts"
 )
 
 const (
@@ -75,14 +75,18 @@ func runTest(t *testing.T, f func(*testing.T, accounts.Storer, context.Context))
 
 func TestCreateAndGetAccount(t *testing.T) {
 	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
+		profileID, err := uuid.GenerateUUID()
+		if err != nil {
+			t.Fatalf("Unexpected error generating ID: %+v\n", err)
+		}
 		account := accounts.Account{
 			ID:        "paddy@impractical.co",
-			ProfileID: uuid.NewRandom().String(),
+			ProfileID: profileID,
 			Created:   time.Now().Round(time.Millisecond),
 			LastUsed:  time.Now().Round(time.Millisecond),
 			LastSeen:  time.Now().Round(time.Millisecond),
 		}
-		err := storer.Create(ctx, account)
+		err = storer.Create(ctx, account)
 		if err != nil {
 			t.Fatalf("Unexpected error creating account: %+v\n", err)
 		}
@@ -109,20 +113,28 @@ func TestGetNonexistentAccount(t *testing.T) {
 
 func TestCreateDuplicateID(t *testing.T) {
 	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
+		profileID, err := uuid.GenerateUUID()
+		if err != nil {
+			t.Fatalf("Unexpected error generating UUID: %+v\n", err)
+		}
 		account := accounts.Account{
 			ID:        "paddy@impractical.co",
-			ProfileID: uuid.NewRandom().String(),
+			ProfileID: profileID,
 			Created:   time.Now().Round(time.Millisecond),
 			LastUsed:  time.Now().Round(time.Millisecond),
 			LastSeen:  time.Now().Round(time.Millisecond),
 		}
-		err := storer.Create(ctx, account)
+		err = storer.Create(ctx, account)
 		if err != nil {
 			t.Fatalf("Unexpected error creating account: %+v\n", err)
 		}
+		profileID2, err := uuid.GenerateUUID()
+		if err != nil {
+			t.Fatalf("Unexpected error generating UUID: %+v\n", err)
+		}
 		account2 := accounts.Account{
 			ID:        account.ID,
-			ProfileID: uuid.NewRandom().String(),
+			ProfileID: profileID2,
 			Created:   time.Now().Add(time.Hour).Round(time.Millisecond),
 			LastUsed:  time.Now().Add(time.Hour).Round(time.Millisecond),
 			LastSeen:  time.Now().Add(time.Hour).Round(time.Millisecond),
@@ -148,14 +160,18 @@ func TestCreateDuplicateID(t *testing.T) {
 
 func TestCreateMultipleAccounts(t *testing.T) {
 	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
+		profileID, err := uuid.GenerateUUID()
+		if err != nil {
+			t.Fatalf("Error generating UUID: %+v\n", err)
+		}
 		account := accounts.Account{
 			ID:        "paddy@impractical.co",
-			ProfileID: uuid.NewRandom().String(),
+			ProfileID: profileID,
 			Created:   time.Now().Round(time.Millisecond),
 			LastUsed:  time.Now().Round(time.Millisecond),
 			LastSeen:  time.Now().Round(time.Millisecond),
 		}
-		err := storer.Create(ctx, account)
+		err = storer.Create(ctx, account)
 		if err != nil {
 			t.Fatalf("Unexpected error creating account: %+v\n", err)
 		}
@@ -188,14 +204,18 @@ func TestCreateMultipleAccounts(t *testing.T) {
 
 func TestListAccountsByProfile(t *testing.T) {
 	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
+		profileID, err := uuid.GenerateUUID()
+		if err != nil {
+			t.Fatalf("Error generating UUID: %+v\n", err)
+		}
 		account := accounts.Account{
 			ID:        "paddy@impractical.co",
-			ProfileID: uuid.NewRandom().String(),
+			ProfileID: profileID,
 			Created:   time.Now().Round(time.Millisecond),
 			LastUsed:  time.Now().Round(time.Millisecond),
 			LastSeen:  time.Now().Round(time.Millisecond),
 		}
-		err := storer.Create(ctx, account)
+		err = storer.Create(ctx, account)
 		if err != nil {
 			t.Fatalf("Unexpected error creating account: %+v\n", err)
 		}
@@ -233,14 +253,18 @@ func TestUpdateOneOfMany(t *testing.T) {
 			t.Run(fmt.Sprintf("i=%d", i), func(t *testing.T) {
 				t.Parallel()
 
+				profileID, err := uuid.GenerateUUID()
+				if err != nil {
+					t.Fatalf("Unexpected error generating UUID: %+v\n", err)
+				}
 				account := accounts.Account{
 					ID:        fmt.Sprintf("paddy+%d@impractical.co", i),
-					ProfileID: uuid.NewRandom().String(),
+					ProfileID: profileID,
 					Created:   time.Now().Round(time.Millisecond),
 					LastUsed:  time.Now().Round(time.Millisecond),
 					LastSeen:  time.Now().Round(time.Millisecond),
 				}
-				err := storer.Create(ctx, account)
+				err = storer.Create(ctx, account)
 				if err != nil {
 					t.Fatalf("Unexpected error creating account: %+v\n", err)
 
@@ -248,9 +272,13 @@ func TestUpdateOneOfMany(t *testing.T) {
 
 				var throwaways []accounts.Account
 				for x := 0; x < 5; x++ {
+					throwawayProfileID, err := uuid.GenerateUUID()
+					if err != nil {
+						t.Fatalf("Unexpected error generating UUID: %+v\n", err)
+					}
 					throwaway := accounts.Account{
 						ID:        fmt.Sprintf("paddy+%d+%d@impractical.co", i, x),
-						ProfileID: uuid.NewRandom().String(),
+						ProfileID: throwawayProfileID,
 						Created:   time.Now().Add(time.Duration(x) * time.Minute).Round(time.Millisecond),
 						LastUsed:  time.Now().Add(time.Duration(x) * time.Hour).Round(time.Millisecond),
 						LastSeen:  time.Now().Add(time.Duration(x) * time.Second).Round(time.Millisecond),
@@ -259,7 +287,7 @@ func TestUpdateOneOfMany(t *testing.T) {
 						throwaway.ProfileID = account.ProfileID
 					}
 
-					err := storer.Create(ctx, throwaway)
+					err = storer.Create(ctx, throwaway)
 					if err != nil {
 						t.Fatalf("Unexpected error creating account: %+v\n", err)
 					}
@@ -331,23 +359,31 @@ func TestUpdateNoChange(t *testing.T) {
 
 func TestDeleteOneOfMany(t *testing.T) {
 	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
+		profileID, err := uuid.GenerateUUID()
+		if err != nil {
+			t.Fatalf("Unexpected error generating UUID: %+v\n", err)
+		}
 		account := accounts.Account{
 			ID:        "paddy@impractical.co",
-			ProfileID: uuid.NewRandom().String(),
+			ProfileID: profileID,
 			Created:   time.Now().Round(time.Millisecond),
 			LastUsed:  time.Now().Round(time.Millisecond),
 			LastSeen:  time.Now().Round(time.Millisecond),
 		}
-		err := storer.Create(ctx, account)
+		err = storer.Create(ctx, account)
 		if err != nil {
 			t.Fatalf("Unexpected error creating account: %+v\n", err)
 		}
 
 		var throwaways []accounts.Account
 		for x := 0; x < 5; x++ {
+			throwawayProfileID, err := uuid.GenerateUUID()
+			if err != nil {
+				t.Fatalf("Unexpected error generating UUID: %+v\n", err)
+			}
 			throwaway := accounts.Account{
 				ID:        fmt.Sprintf("paddy+%d@impractical.co", x),
-				ProfileID: uuid.NewRandom().String(),
+				ProfileID: throwawayProfileID,
 				Created:   time.Now().Add(time.Duration(x) * time.Minute).Round(time.Millisecond),
 				LastUsed:  time.Now().Add(time.Duration(x) * time.Hour).Round(time.Millisecond),
 				LastSeen:  time.Now().Add(time.Duration(x) * time.Second).Round(time.Millisecond),
@@ -356,7 +392,7 @@ func TestDeleteOneOfMany(t *testing.T) {
 				throwaway.ProfileID = account.ProfileID
 			}
 
-			err := storer.Create(ctx, throwaway)
+			err = storer.Create(ctx, throwaway)
 			if err != nil {
 				t.Fatalf("Unexpected error creating account: %+v\n", err)
 			}

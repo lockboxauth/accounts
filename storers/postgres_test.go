@@ -10,7 +10,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/pborman/uuid"
+	"github.com/hashicorp/go-uuid"
 	migrate "github.com/rubenv/sql-migrate"
 
 	"impractical.co/auth/accounts"
@@ -51,7 +51,12 @@ func (p *PostgresFactory) NewStorer(ctx context.Context) (accounts.Storer, error
 		return nil, errors.New("PG_TEST_DB must begin with postgres://")
 	}
 
-	table := "accounts_test_" + hex.EncodeToString([]byte(uuid.NewRandom()))
+	table_suffix, err := uuid.GenerateRandomBytes(6)
+	if err != nil {
+		log.Printf("Error generating table suffix: %+v\n", err)
+		return nil, err
+	}
+	table := "accounts_test_" + hex.EncodeToString(table_suffix)
 
 	_, err = p.db.Exec("CREATE DATABASE " + table + ";")
 	if err != nil {
