@@ -1,6 +1,6 @@
 {
-	"ImportPath": "code.impractical.co/accounts",
-	"GoVersion": "go1.8",
+	"ImportPath": "impractical.co/auth/accounts",
+	"GoVersion": "go1.9rc2",
 	"GodepVersion": "v79",
 	"Packages": [
 		"./..."

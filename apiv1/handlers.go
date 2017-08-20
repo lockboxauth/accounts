@@ -3,9 +3,9 @@ package apiv1
 import (
 	"net/http"
 
-	"code.impractical.co/accounts"
 	"darlinggo.co/api"
 	"darlinggo.co/trout"
+	"impractical.co/auth/accounts"
 )
 
 func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {

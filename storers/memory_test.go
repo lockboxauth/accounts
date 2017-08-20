@@ -3,7 +3,7 @@ package storers
 import (
 	"context"
 
-	"code.impractical.co/accounts"
+	"impractical.co/auth/accounts"
 )
 
 func init() {

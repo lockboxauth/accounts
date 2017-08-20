@@ -13,8 +13,8 @@ import (
 	"github.com/pborman/uuid"
 	migrate "github.com/rubenv/sql-migrate"
 
-	"code.impractical.co/accounts"
-	"code.impractical.co/accounts/migrations"
+	"impractical.co/auth/accounts"
+	"impractical.co/auth/accounts/migrations"
 )
 
 func init() {

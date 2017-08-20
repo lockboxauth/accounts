@@ -5,7 +5,7 @@ import (
 
 	memdb "github.com/hashicorp/go-memdb"
 
-	"code.impractical.co/accounts"
+	"impractical.co/auth/accounts"
 )
 
 var (

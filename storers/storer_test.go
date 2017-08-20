@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"code.impractical.co/accounts"
+	"impractical.co/auth/accounts"
 
 	"github.com/pborman/uuid"
 )

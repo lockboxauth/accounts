@@ -3,7 +3,7 @@ package apiv1
 import (
 	"time"
 
-	"code.impractical.co/accounts"
+	"impractical.co/auth/accounts"
 )
 
 // Account is the API representation of an Account.

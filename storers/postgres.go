@@ -8,7 +8,7 @@ import (
 
 	"github.com/lib/pq"
 
-	"code.impractical.co/accounts"
+	"impractical.co/auth/accounts"
 )
 
 // Postgres provides a PostgreSQL-backed implementation of the Storer

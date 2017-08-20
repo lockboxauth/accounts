@@ -1,8 +1,8 @@
 package apiv1
 
 import (
-	"code.impractical.co/accounts"
 	"darlinggo.co/api"
+	"impractical.co/auth/accounts"
 )
 
 // APIv1 holds all the information that we want to

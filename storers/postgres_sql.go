@@ -3,8 +3,8 @@ package storers
 import (
 	"context"
 
-	"code.impractical.co/accounts"
 	"darlinggo.co/pan"
+	"impractical.co/auth/accounts"
 )
 
 func getSQL(ctx context.Context, id string) *pan.Query {
