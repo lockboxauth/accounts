@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
 
 mkdir -p .cover-profiles
 rm .cover-profiles/*
