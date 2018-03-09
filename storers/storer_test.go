@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-uuid"
+	yall "yall.in"
+	"yall.in/colour"
 
 	"impractical.co/auth/accounts"
 )
@@ -60,8 +62,9 @@ func TestMain(m *testing.M) {
 
 func runTest(t *testing.T, f func(*testing.T, accounts.Storer, context.Context)) {
 	t.Parallel()
+	logger := yall.New(colour.New(os.Stdout, yall.Debug))
 	for _, factory := range storerFactories {
-		ctx := context.Background()
+		ctx := yall.InContext(context.Background(), logger)
 		storer, err := factory.NewStorer(ctx)
 		if err != nil {
 			t.Fatalf("Error creating Storer from %T: %+v\n", factory, err)
@@ -142,7 +145,7 @@ func TestCreateDuplicateID(t *testing.T) {
 
 		err = storer.Create(ctx, account2)
 		if err != accounts.ErrAccountAlreadyExists {
-			t.Fatalf("Expected ErrAccountAlreadyExists, got %v\n", err)
+			t.Fatalf("Expected ErrAccountAlreadyExists, got (%T) %s", err, err.Error())
 		}
 
 		// we shouldn't have changed anything about what was stored
