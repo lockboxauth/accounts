@@ -27,7 +27,7 @@ func NewPostgres(ctx context.Context, conn *sql.DB) *Postgres {
 // an ErrAccountAlreadyExists error if the Account's ID already exists in the
 // database.
 func (p *Postgres) Create(ctx context.Context, account accounts.Account) error {
-	query := createSQL(ctx, account)
+	query := createSQL(ctx, toPostgres(account))
 	queryStr, err := query.PostgreSQLString()
 	if err != nil {
 		return err
@@ -54,20 +54,20 @@ func (p *Postgres) Get(ctx context.Context, id string) (accounts.Account, error)
 	if err != nil {
 		return accounts.Account{}, err
 	}
-	var account accounts.Account
+	var account postgresAccount
 	for rows.Next() {
 		err = pan.Unmarshal(rows, &account)
 		if err != nil {
-			return account, err
+			return accounts.Account{}, err
 		}
 	}
 	if err = rows.Err(); err != nil {
-		return account, err
+		return accounts.Account{}, err
 	}
 	if account.ID == "" {
-		return account, accounts.ErrAccountNotFound
+		return accounts.Account{}, accounts.ErrAccountNotFound
 	}
-	return account, nil
+	return fromPostgres(account), nil
 }
 
 // Update applies the passed Change to the Account in the PostgreSQL database
@@ -117,12 +117,12 @@ func (p *Postgres) ListByProfile(ctx context.Context, profileID string) ([]accou
 	}
 	var accts []accounts.Account
 	for rows.Next() {
-		var account accounts.Account
+		var account postgresAccount
 		err = pan.Unmarshal(rows, &account)
 		if err != nil {
 			return accts, err
 		}
-		accts = append(accts, account)
+		accts = append(accts, fromPostgres(account))
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err

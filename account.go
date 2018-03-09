@@ -23,18 +23,11 @@ var (
 // allowing users to have multiple identifiers that are all
 // interchangeable.
 type Account struct {
-	ID        string    `sql_column:"id"`
-	ProfileID string    `sql_column:"profile_id"`
-	Created   time.Time `sql_column:"created_at"`
-	LastUsed  time.Time `sql_column:"last_used_at"`
-	LastSeen  time.Time `sql_column:"last_seen_at"`
-}
-
-// GetSQLTableName returns the name of the SQL table that
-// the Accounts should be stored in; it is necessary for us
-// to use pan with our Accounts.
-func (a Account) GetSQLTableName() string {
-	return "accounts"
+	ID        string
+	ProfileID string
+	Created   time.Time
+	LastUsed  time.Time
+	LastSeen  time.Time
 }
 
 // Change represents a requested change to one or more of an
