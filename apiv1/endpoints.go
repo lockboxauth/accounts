@@ -5,7 +5,17 @@ import (
 
 	"darlinggo.co/api"
 	"darlinggo.co/trout"
+	yall "yall.in"
 )
+
+func (a APIv1) contextLogger(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log := a.Log.WithRequest(r).WithField("endpoint", r.Header.Get("Trout-Pattern"))
+		r = r.WithContext(yall.InContext(r.Context(), log))
+		log.Debug("serving request")
+		h.ServeHTTP(w, r)
+	})
+}
 
 // Server returns an http.Handler that will handle all
 // the requests for v1 of the API. The baseURL should be
@@ -14,10 +24,10 @@ import (
 func (a APIv1) Server(baseURL string) http.Handler {
 	var router trout.Router
 	router.SetPrefix(baseURL)
-	router.Endpoint("/").Methods("POST").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleCreateAccount)))
-	router.Endpoint("/").Methods("GET").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleListAccounts)))
-	router.Endpoint("/{id}").Methods("GET").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleGetAccount)))
-	router.Endpoint("/{id}").Methods("DELETE").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleDeleteAccount)))
+	router.Endpoint("/").Methods("POST").Handler(a.contextLogger(api.NegotiateMiddleware(http.HandlerFunc(a.handleCreateAccount))))
+	router.Endpoint("/").Methods("GET").Handler(a.contextLogger(api.NegotiateMiddleware(http.HandlerFunc(a.handleListAccounts))))
+	router.Endpoint("/{id}").Methods("GET").Handler(a.contextLogger(api.NegotiateMiddleware(http.HandlerFunc(a.handleGetAccount))))
+	router.Endpoint("/{id}").Methods("DELETE").Handler(a.contextLogger(api.NegotiateMiddleware(http.HandlerFunc(a.handleDeleteAccount))))
 
 	return router
 }

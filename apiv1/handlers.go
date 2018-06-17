@@ -6,13 +6,14 @@ import (
 	"darlinggo.co/api"
 	"darlinggo.co/trout"
 	"impractical.co/auth/accounts"
+	yall "yall.in"
 )
 
 func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	var body Account
 	err := api.Decode(r, &body)
 	if err != nil {
-		a.Log.WithError(err).Debug("Error decoding request body")
+		yall.FromContext(r.Context()).WithError(err).Debug("Error decoding request body")
 		api.Encode(w, r, http.StatusBadRequest, Response{Errors: api.InvalidFormatError})
 		return
 	}
@@ -37,11 +38,11 @@ func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 			api.Encode(w, r, http.StatusBadRequest, Response{Errors: []api.RequestError{{Field: "/id", Slug: api.RequestErrConflict}}})
 			return
 		}
-		a.Log.WithError(err).Errorf("Error creating account")
+		yall.FromContext(r.Context()).WithError(err).Error("Error creating account")
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}
-	a.Log.WithField("account_id", account.ID).Debug("Account created")
+	yall.FromContext(r.Context()).WithField("account_id", account.ID).Debug("Account created")
 	api.Encode(w, r, http.StatusCreated, Response{Accounts: []Account{apiAccount(account)}})
 }
 
@@ -58,7 +59,7 @@ func (a APIv1) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 			api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Field: "/id", Slug: api.RequestErrNotFound}}})
 			return
 		}
-		a.Log.WithField("account_id", id).WithError(err).Error("Error retrieving account")
+		yall.FromContext(r.Context()).WithField("account_id", id).WithError(err).Error("Error retrieving account")
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}
@@ -79,18 +80,18 @@ func (a APIv1) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 			api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Field: "/id", Slug: api.RequestErrNotFound}}})
 			return
 		}
-		a.Log.WithField("account_id", id).WithError(err).Error("Error retrieving account")
+		yall.FromContext(r.Context()).WithField("account_id", id).WithError(err).Error("Error retrieving account")
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}
 	// TODO(paddy): requester needs to either be the profile associated with the account or have an admin scope
 	err = a.Storer.Delete(r.Context(), id)
 	if err != nil {
-		a.Log.WithField("account_id", id).WithError(err).Error("Error deleting account")
+		yall.FromContext(r.Context()).WithField("account_id", id).WithError(err).Error("Error deleting account")
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}
-	a.Log.WithField("account_id", id).Debug("Account deleted")
+	yall.FromContext(r.Context()).WithField("account_id", id).Debug("Account deleted")
 	api.Encode(w, r, http.StatusOK, Response{Accounts: []Account{apiAccount(account)}})
 }
 
@@ -103,7 +104,7 @@ func (a APIv1) handleListAccounts(w http.ResponseWriter, r *http.Request) {
 	// TODO(paddy): requester needs to match the profile ID, or have an admin scope
 	accts, err := a.Storer.ListByProfile(r.Context(), profileID)
 	if err != nil {
-		a.Log.WithField("profile_id", profileID).WithError(err).Error("Error listing accounts")
+		yall.FromContext(r.Context()).WithField("profile_id", profileID).WithError(err).Error("Error listing accounts")
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}

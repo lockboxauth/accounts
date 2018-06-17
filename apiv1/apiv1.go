@@ -3,6 +3,7 @@ package apiv1
 import (
 	"darlinggo.co/api"
 	"impractical.co/auth/accounts"
+	yall "yall.in"
 )
 
 // APIv1 holds all the information that we want to
@@ -11,6 +12,7 @@ import (
 // telemetry.
 type APIv1 struct {
 	accounts.Dependencies
+	Log *yall.Logger
 }
 
 // Response is used to encode JSON responses; it is

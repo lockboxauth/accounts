@@ -7,8 +7,6 @@ import (
 	"errors"
 	"sort"
 	"time"
-
-	"github.com/apex/log"
 )
 
 var (
@@ -98,7 +96,6 @@ func FillDefaults(account Account) Account {
 // their own place in every function's signature.
 type Dependencies struct {
 	Storer Storer
-	Log    *log.Logger
 }
 
 type byLastUsedDesc []Account
