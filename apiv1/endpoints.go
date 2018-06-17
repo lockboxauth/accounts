@@ -17,7 +17,6 @@ func (a APIv1) Server(baseURL string) http.Handler {
 	router.Endpoint("/").Methods("POST").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleCreateAccount)))
 	router.Endpoint("/").Methods("GET").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleListAccounts)))
 	router.Endpoint("/{id}").Methods("GET").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleGetAccount)))
-	router.Endpoint("/{id}").Methods("PUT").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleUpdateAccount)))
 	router.Endpoint("/{id}").Methods("DELETE").Handler(api.NegotiateMiddleware(http.HandlerFunc(a.handleDeleteAccount)))
 
 	return router

@@ -23,6 +23,8 @@ func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 		reqErrs = append(reqErrs, api.RequestError{Field: "/id", Slug: api.RequestErrMissing})
 	}
 	if account.ProfileID == "" {
+		// TODO(paddy): if the profile is set, we need to make sure the request is authenticated by that profile or an admin scope
+		// if this is set, that means we're adding an account to a profile, and we need auth to do that
 		reqErrs = append(reqErrs, api.RequestError{Field: "/profileID", Slug: api.RequestErrMissing})
 	}
 	if len(reqErrs) > 0 {
@@ -56,43 +58,11 @@ func (a APIv1) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 			api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Field: "/id", Slug: api.RequestErrNotFound}}})
 			return
 		}
-		a.Log.WithField("account_id", id).WithError(err).Error("Error retrievin account")
-		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
-		return
-	}
-	api.Encode(w, r, http.StatusOK, Response{Accounts: []Account{apiAccount(account)}})
-}
-
-func (a APIv1) handleUpdateAccount(w http.ResponseWriter, r *http.Request) {
-	vars := trout.RequestVars(r)
-	id := vars.Get("id")
-	if id == "" {
-		api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Param: "/id", Slug: api.RequestErrNotFound}}})
-		return
-	}
-	var body Change
-	err := api.Decode(r, &body)
-	if err != nil {
-		a.Log.WithError(err).Debug("Error decoding request")
-		api.Encode(w, r, http.StatusBadRequest, Response{Errors: api.InvalidFormatError})
-		return
-	}
-	err = a.Storer.Update(r.Context(), id, coreChange(body))
-	if err != nil {
-		a.Log.WithField("account_id", id).WithError(err).Error("Error updating account")
-		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
-		return
-	}
-	account, err := a.Storer.Get(r.Context(), id)
-	if err != nil {
-		if err == accounts.ErrAccountNotFound {
-			api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Field: "/id", Slug: api.RequestErrNotFound}}})
-			return
-		}
 		a.Log.WithField("account_id", id).WithError(err).Error("Error retrieving account")
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}
+	// TODO(paddy): requester needs to either be the profile associated with the account or have an admin scope
 	api.Encode(w, r, http.StatusOK, Response{Accounts: []Account{apiAccount(account)}})
 }
 
@@ -113,6 +83,7 @@ func (a APIv1) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}
+	// TODO(paddy): requester needs to either be the profile associated with the account or have an admin scope
 	err = a.Storer.Delete(r.Context(), id)
 	if err != nil {
 		a.Log.WithField("account_id", id).WithError(err).Error("Error deleting account")
@@ -129,6 +100,7 @@ func (a APIv1) handleListAccounts(w http.ResponseWriter, r *http.Request) {
 		api.Encode(w, r, http.StatusBadRequest, Response{Errors: []api.RequestError{{Param: "profileID", Slug: api.RequestErrMissing}}})
 		return
 	}
+	// TODO(paddy): requester needs to match the profile ID, or have an admin scope
 	accts, err := a.Storer.ListByProfile(r.Context(), profileID)
 	if err != nil {
 		a.Log.WithField("profile_id", profileID).WithError(err).Error("Error listing accounts")
