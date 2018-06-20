@@ -14,6 +14,8 @@ var (
 	ErrAccountNotFound = errors.New("account not found")
 	// ErrAccountAlreadyExists is returned when attempting to create an Account that already exists.
 	ErrAccountAlreadyExists = errors.New("account already exists")
+	// ErrProfileIDAlreadyExists is returned when an account is registered by the ProfileID already exists.
+	ErrProfileIDAlreadyExists = errors.New("profileID already exists")
 )
 
 // Account is a representation of a user's identifier. It maps
@@ -21,11 +23,12 @@ var (
 // allowing users to have multiple identifiers that are all
 // interchangeable.
 type Account struct {
-	ID        string
-	ProfileID string
-	Created   time.Time
-	LastUsed  time.Time
-	LastSeen  time.Time
+	ID             string
+	ProfileID      string
+	Created        time.Time
+	LastUsed       time.Time
+	LastSeen       time.Time
+	IsRegistration bool
 }
 
 // Change represents a requested change to one or more of an

@@ -60,6 +60,15 @@ func (m *Memstore) Create(ctx context.Context, account accounts.Account) error {
 	if exists != nil {
 		return accounts.ErrAccountAlreadyExists
 	}
+	if account.IsRegistration {
+		exists, err = txn.First("account", "profileID", account.ProfileID)
+		if err != nil {
+			return err
+		}
+		if exists != nil {
+			return accounts.ErrProfileIDAlreadyExists
+		}
+	}
 	err = txn.Insert("account", &account)
 	if err != nil {
 		return err

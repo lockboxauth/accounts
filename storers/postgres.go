@@ -37,6 +37,9 @@ func (p *Postgres) Create(ctx context.Context, account accounts.Account) error {
 		if e.Constraint == "accounts_pkey" {
 			err = accounts.ErrAccountAlreadyExists
 		}
+		if e.Constraint == "unique_registration" {
+			err = accounts.ErrProfileIDAlreadyExists
+		}
 	}
 	return err
 }

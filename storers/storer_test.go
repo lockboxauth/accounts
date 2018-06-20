@@ -45,6 +45,9 @@ func compareAccounts(account1, account2 accounts.Account) (success bool, field s
 	if !account1.LastSeen.Equal(account2.LastSeen) {
 		return false, "LastSeen", account1.LastSeen, account2.LastSeen
 	}
+	if account1.IsRegistration != account2.IsRegistration {
+		return false, "IsRegistration", account1.IsRegistration, account2.IsRegistration
+	}
 	return true, "", nil, nil
 }
 
@@ -146,6 +149,126 @@ func TestCreateDuplicateID(t *testing.T) {
 		err = storer.Create(ctx, account2)
 		if err != accounts.ErrAccountAlreadyExists {
 			t.Fatalf("Expected ErrAccountAlreadyExists, got (%T) %s", err, err.Error())
+		}
+
+		// we shouldn't have changed anything about what was stored
+		resp, err := storer.Get(ctx, account.ID)
+		if err != nil {
+			t.Fatalf("Unexpected error retrieving account: %+v\n", err)
+		}
+
+		ok, field, expected, result := compareAccounts(account, resp)
+		if !ok {
+			t.Errorf("Expected %s to be %v, got %v\n", field, expected, result)
+		}
+	})
+}
+
+func TestCreateSecondaryAccounts(t *testing.T) {
+	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
+		profileID, err := uuid.GenerateUUID()
+		if err != nil {
+			t.Fatalf("Unexpected error generating UUID: %+v\n", err)
+		}
+		account := accounts.Account{
+			ID:             "paddy@impractical.co",
+			ProfileID:      profileID,
+			Created:        time.Now().Round(time.Millisecond),
+			LastUsed:       time.Now().Round(time.Millisecond),
+			LastSeen:       time.Now().Round(time.Millisecond),
+			IsRegistration: true,
+		}
+		err = storer.Create(ctx, account)
+		if err != nil {
+			t.Fatalf("Unexpected error creating account: %+v\n", err)
+		}
+		account2 := accounts.Account{
+			ID:        "paddy@impracticallabs.com",
+			ProfileID: profileID,
+			Created:   time.Now().Add(time.Hour).Round(time.Millisecond),
+			LastUsed:  time.Now().Add(time.Hour).Round(time.Millisecond),
+			LastSeen:  time.Now().Add(time.Hour).Round(time.Millisecond),
+		}
+
+		err = storer.Create(ctx, account2)
+		if err != nil {
+			t.Fatalf("Unexpected error creating second account: %+v\n", err)
+		}
+		account3 := accounts.Account{
+			ID:        "paddy@carvers.co",
+			ProfileID: profileID,
+			Created:   time.Now().Add(time.Hour).Round(time.Millisecond),
+			LastUsed:  time.Now().Add(time.Hour).Round(time.Millisecond),
+			LastSeen:  time.Now().Add(time.Hour).Round(time.Millisecond),
+		}
+
+		err = storer.Create(ctx, account3)
+		if err != nil {
+			t.Fatalf("Unexpected error creating third account: %+v\n", err)
+		}
+
+		resp, err := storer.Get(ctx, account.ID)
+		if err != nil {
+			t.Fatalf("Unexpected error retrieving account: %+v\n", err)
+		}
+
+		ok, field, expected, result := compareAccounts(account, resp)
+		if !ok {
+			t.Errorf("Expected %s to be %v, got %v\n", field, expected, result)
+		}
+
+		resp, err = storer.Get(ctx, account2.ID)
+		if err != nil {
+			t.Fatalf("Unexpected error retrieving account: %+v\n", err)
+		}
+
+		ok, field, expected, result = compareAccounts(account2, resp)
+		if !ok {
+			t.Errorf("Expected %s to be %v, got %v\n", field, expected, result)
+		}
+
+		resp, err = storer.Get(ctx, account3.ID)
+		if err != nil {
+			t.Fatalf("Unexpected error retrieving account: %+v\n", err)
+		}
+
+		ok, field, expected, result = compareAccounts(account3, resp)
+		if !ok {
+			t.Errorf("Expected %s to be %v, got %v\n", field, expected, result)
+		}
+	})
+}
+
+func TestCreateDuplicateRegistration(t *testing.T) {
+	runTest(t, func(t *testing.T, storer accounts.Storer, ctx context.Context) {
+		profileID, err := uuid.GenerateUUID()
+		if err != nil {
+			t.Fatalf("Unexpected error generating UUID: %+v\n", err)
+		}
+		account := accounts.Account{
+			ID:             "paddy@impractical.co",
+			ProfileID:      profileID,
+			Created:        time.Now().Round(time.Millisecond),
+			LastUsed:       time.Now().Round(time.Millisecond),
+			LastSeen:       time.Now().Round(time.Millisecond),
+			IsRegistration: true,
+		}
+		err = storer.Create(ctx, account)
+		if err != nil {
+			t.Fatalf("Unexpected error creating account: %+v\n", err)
+		}
+		account2 := accounts.Account{
+			ID:             "paddy@impracticallabs.com",
+			ProfileID:      profileID,
+			Created:        time.Now().Add(time.Hour).Round(time.Millisecond),
+			LastUsed:       time.Now().Add(time.Hour).Round(time.Millisecond),
+			LastSeen:       time.Now().Add(time.Hour).Round(time.Millisecond),
+			IsRegistration: true,
+		}
+
+		err = storer.Create(ctx, account2)
+		if err != accounts.ErrProfileIDAlreadyExists {
+			t.Fatalf("Expected ErrProfileIDAlreadyExists, got (%T) %v", err, err)
 		}
 
 		// we shouldn't have changed anything about what was stored
