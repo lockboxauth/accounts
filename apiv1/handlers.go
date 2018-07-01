@@ -36,6 +36,12 @@ func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 			api.Encode(w, r, resp.Status, resp)
 			return
 		}
+		if sess == nil {
+			api.Encode(w, r, http.StatusUnauthorized, Response{Errors: []api.RequestError{
+				{Header: "Authorization", Slug: api.RequestErrAccessDenied},
+			}})
+			return
+		}
 		if sess.ProfileID != account.ProfileID {
 			api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
 				{Header: "Authorization", Slug: api.RequestErrAccessDenied},
@@ -79,6 +85,12 @@ func (a APIv1) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 		api.Encode(w, r, resp.Status, resp)
 		return
 	}
+	if sess == nil {
+		api.Encode(w, r, http.StatusUnauthorized, Response{Errors: []api.RequestError{
+			{Header: "Authorization", Slug: api.RequestErrAccessDenied},
+		}})
+		return
+	}
 	if sess.ProfileID != account.ProfileID {
 		api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
 			{Param: "/id", Slug: api.RequestErrAccessDenied},
@@ -110,6 +122,12 @@ func (a APIv1) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 		api.Encode(w, r, resp.Status, resp)
 		return
 	}
+	if sess == nil {
+		api.Encode(w, r, http.StatusUnauthorized, Response{Errors: []api.RequestError{
+			{Header: "Authorization", Slug: api.RequestErrAccessDenied},
+		}})
+		return
+	}
 	if sess.ProfileID != account.ProfileID {
 		api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
 			{Param: "/id", Slug: api.RequestErrAccessDenied},
@@ -135,6 +153,12 @@ func (a APIv1) handleListAccounts(w http.ResponseWriter, r *http.Request) {
 	sess, resp := a.GetAuthToken(r)
 	if resp != nil {
 		api.Encode(w, r, resp.Status, resp)
+		return
+	}
+	if sess == nil {
+		api.Encode(w, r, http.StatusUnauthorized, Response{Errors: []api.RequestError{
+			{Header: "Authorization", Slug: api.RequestErrAccessDenied},
+		}})
 		return
 	}
 	if sess.ProfileID != profileID {
