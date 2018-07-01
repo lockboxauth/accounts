@@ -5,6 +5,7 @@ import (
 
 	"darlinggo.co/api"
 	"darlinggo.co/trout"
+	uuid "github.com/hashicorp/go-uuid"
 	"impractical.co/auth/accounts"
 	yall "yall.in"
 )
@@ -48,6 +49,14 @@ func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 			}})
 			return
 		}
+	} else {
+		profileID, err := uuid.GenerateUUID()
+		if err != nil {
+			yall.FromContext(r.Context()).WithError(err).Error("error generating profile ID")
+			api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
+			return
+		}
+		account.ProfileID = profileID
 	}
 	err = a.Storer.Create(r.Context(), account)
 	if err != nil {
