@@ -2,6 +2,7 @@ package apiv1
 
 import (
 	"net/http"
+	"strings"
 
 	"darlinggo.co/api"
 	"darlinggo.co/trout"
@@ -11,6 +12,9 @@ import (
 func (a APIv1) contextLogger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log := a.Log.WithRequest(r).WithField("endpoint", r.Header.Get("Trout-Pattern")).WithField("method", r.Method)
+		for k, v := range trout.RequestVars(r) {
+			log = log.WithField("url."+strings.ToLower(k), v)
+		}
 		r = r.WithContext(yall.InContext(r.Context(), log))
 		log.Debug("serving request")
 		h.ServeHTTP(w, r)
