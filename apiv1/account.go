@@ -10,11 +10,12 @@ import (
 // it dictates what the JSON representation of Accounts
 // will be.
 type Account struct {
-	ID         string    `json:"id"`
-	ProfileID  string    `json:"profileID"`
-	CreatedAt  time.Time `json:"createdAt"`
-	LastSeenAt time.Time `json:"lastSeenAt,omitempty"`
-	LastUsedAt time.Time `json:"lastUsedAt,omitempty"`
+	ID             string    `json:"id"`
+	ProfileID      string    `json:"profileID"`
+	IsRegistration bool      `json:"isRegistration"`
+	CreatedAt      time.Time `json:"createdAt"`
+	LastSeenAt     time.Time `json:"lastSeenAt,omitempty"`
+	LastUsedAt     time.Time `json:"lastUsedAt,omitempty"`
 }
 
 // Change is the API representation of a Change.
@@ -27,11 +28,12 @@ type Change struct {
 
 func coreAccount(account Account) accounts.Account {
 	return accounts.Account{
-		ID:        account.ID,
-		ProfileID: account.ProfileID,
-		Created:   account.CreatedAt,
-		LastSeen:  account.LastSeenAt,
-		LastUsed:  account.LastUsedAt,
+		ID:             account.ID,
+		ProfileID:      account.ProfileID,
+		IsRegistration: account.IsRegistration,
+		Created:        account.CreatedAt,
+		LastSeen:       account.LastSeenAt,
+		LastUsed:       account.LastUsedAt,
 	}
 }
 
@@ -45,11 +47,12 @@ func coreAccounts(accts []Account) []accounts.Account {
 
 func apiAccount(account accounts.Account) Account {
 	return Account{
-		ID:         account.ID,
-		ProfileID:  account.ProfileID,
-		CreatedAt:  account.Created,
-		LastSeenAt: account.LastSeen,
-		LastUsedAt: account.LastUsed,
+		ID:             account.ID,
+		ProfileID:      account.ProfileID,
+		IsRegistration: account.IsRegistration,
+		CreatedAt:      account.Created,
+		LastSeenAt:     account.LastSeen,
+		LastUsedAt:     account.LastUsed,
 	}
 }
 
