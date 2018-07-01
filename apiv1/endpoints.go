@@ -10,7 +10,7 @@ import (
 
 func (a APIv1) contextLogger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log := a.Log.WithRequest(r).WithField("endpoint", r.Header.Get("Trout-Pattern"))
+		log := a.Log.WithRequest(r).WithField("endpoint", r.Header.Get("Trout-Pattern")).WithField("method", r.Method)
 		r = r.WithContext(yall.InContext(r.Context(), log))
 		log.Debug("serving request")
 		h.ServeHTTP(w, r)
