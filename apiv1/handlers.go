@@ -23,14 +23,25 @@ func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	if account.ID == "" {
 		reqErrs = append(reqErrs, api.RequestError{Field: "/id", Slug: api.RequestErrMissing})
 	}
-	if account.ProfileID == "" {
-		// TODO(paddy): if the profile is set, we need to make sure the request is authenticated by that profile or an admin scope
-		// if this is set, that means we're adding an account to a profile, and we need auth to do that
+	if account.ProfileID == "" && !account.IsRegistration {
 		reqErrs = append(reqErrs, api.RequestError{Field: "/profileID", Slug: api.RequestErrMissing})
 	}
 	if len(reqErrs) > 0 {
 		api.Encode(w, r, http.StatusBadRequest, reqErrs)
 		return
+	}
+	if account.ProfileID != "" {
+		sess, resp := a.GetAuthToken(r)
+		if resp != nil {
+			api.Encode(w, r, resp.Status, resp)
+			return
+		}
+		if sess.ProfileID != account.ProfileID {
+			api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
+				{Header: "Authorization", Slug: api.RequestErrAccessDenied},
+			}})
+			return
+		}
 	}
 	err = a.Storer.Create(r.Context(), account)
 	if err != nil {
@@ -63,7 +74,17 @@ func (a APIv1) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}
-	// TODO(paddy): requester needs to either be the profile associated with the account or have an admin scope
+	sess, resp := a.GetAuthToken(r)
+	if resp != nil {
+		api.Encode(w, r, resp.Status, resp)
+		return
+	}
+	if sess.ProfileID != account.ProfileID {
+		api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
+			{Param: "/id", Slug: api.RequestErrAccessDenied},
+		}})
+		return
+	}
 	api.Encode(w, r, http.StatusOK, Response{Accounts: []Account{apiAccount(account)}})
 }
 
@@ -84,7 +105,17 @@ func (a APIv1) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 		api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
 		return
 	}
-	// TODO(paddy): requester needs to either be the profile associated with the account or have an admin scope
+	sess, resp := a.GetAuthToken(r)
+	if resp != nil {
+		api.Encode(w, r, resp.Status, resp)
+		return
+	}
+	if sess.ProfileID != account.ProfileID {
+		api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
+			{Param: "/id", Slug: api.RequestErrAccessDenied},
+		}})
+		return
+	}
 	err = a.Storer.Delete(r.Context(), id)
 	if err != nil {
 		yall.FromContext(r.Context()).WithField("account_id", id).WithError(err).Error("Error deleting account")
@@ -101,7 +132,17 @@ func (a APIv1) handleListAccounts(w http.ResponseWriter, r *http.Request) {
 		api.Encode(w, r, http.StatusBadRequest, Response{Errors: []api.RequestError{{Param: "profileID", Slug: api.RequestErrMissing}}})
 		return
 	}
-	// TODO(paddy): requester needs to match the profile ID, or have an admin scope
+	sess, resp := a.GetAuthToken(r)
+	if resp != nil {
+		api.Encode(w, r, resp.Status, resp)
+		return
+	}
+	if sess.ProfileID != profileID {
+		api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
+			{Param: "profileID", Slug: api.RequestErrAccessDenied},
+		}})
+		return
+	}
 	accts, err := a.Storer.ListByProfile(r.Context(), profileID)
 	if err != nil {
 		yall.FromContext(r.Context()).WithField("profile_id", profileID).WithError(err).Error("Error listing accounts")
