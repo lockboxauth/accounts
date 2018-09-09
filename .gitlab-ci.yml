@@ -4,6 +4,8 @@ stages:
   - test
 
 vet:
+  variables:
+    GO111MODULE: on
   stage: test
   cache:
     paths:
@@ -12,6 +14,8 @@ vet:
     - go vet ./...
 
 test:
+  variables:
+    GO111MODULE: on
   stage: test
   cache:
     paths:
