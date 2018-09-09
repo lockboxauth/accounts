@@ -9,7 +9,7 @@ vet:
   stage: test
   cache:
     paths:
-      - $GOPATH/pkg/mod
+      - /go/pkg/mod
   script:
     - go vet ./...
 
@@ -19,6 +19,6 @@ test:
   stage: test
   cache:
     paths:
-      - $GOPATH/pkg/mod
+      - /go/pkg/mod
   script:
     - go test all -race -v 
