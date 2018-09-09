@@ -3,7 +3,7 @@ module impractical.co/auth/accounts
 require (
 	bitbucket.org/ww/goautoneg v0.0.0-20120707110453-75cd24fc2f2c // indirect
 	darlinggo.co/api v0.0.0-20160924005218-06eb95038fc2
-	darlinggo.co/pan v0.1.0
+	darlinggo.co/pan v0.2.0
 	darlinggo.co/trout v1.0.1
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.0 // indirect
