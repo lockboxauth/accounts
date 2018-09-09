@@ -11,8 +11,4 @@ vet:
 test:
   stage: test
   script:
-    - go test all -race -v -covermode=atomic -coverprofile=cover-profile.out
-    - go tool cover -html=cover-profile.out -o coverage.html
-  artifacts:
-    paths:
-      - coverage.html
+    - go test all -race -v 
