@@ -1,0 +1,18 @@
+image: golang:1.11-stretch
+
+stages:
+  - test
+
+vet:
+  stage: test
+  script:
+    - go vet ./...
+
+test:
+  stage: test
+  script:
+    - go test all -race -v -covermode=atomic -coverprofile=cover-profile.out
+    - go tool cover -html=cover-profile.out -o coverage.html
+  artifacts:
+    paths:
+      - coverage.html
