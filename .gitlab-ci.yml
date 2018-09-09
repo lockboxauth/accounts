@@ -5,7 +5,7 @@ stages:
 
 vet:
   variables:
-    GO111MODULE: on
+    GO111MODULE: "on"
   stage: test
   cache:
     paths:
@@ -15,7 +15,7 @@ vet:
 
 test:
   variables:
-    GO111MODULE: on
+    GO111MODULE: "on"
   stage: test
   cache:
     paths:
