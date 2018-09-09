@@ -5,10 +5,16 @@ stages:
 
 vet:
   stage: test
+  cache:
+    paths:
+      - $GOPATH/pkg/mod
   script:
     - go vet ./...
 
 test:
   stage: test
+  cache:
+    paths:
+      - $GOPATH/pkg/mod
   script:
     - go test all -race -v 
