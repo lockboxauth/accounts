@@ -19,6 +19,9 @@ type APIv1 struct {
 	Sessions sessions.Dependencies
 }
 
+// GetAuthToken returns the access token associated
+// with the request, or a Response that should be
+// rendered if there's an error.
 func (a APIv1) GetAuthToken(r *http.Request) (*sessions.AccessToken, *Response) {
 	sess, err := a.Sessions.TokenFromRequest(r)
 	if err != nil {
@@ -30,12 +33,11 @@ func (a APIv1) GetAuthToken(r *http.Request) (*sessions.AccessToken, *Response) 
 				}},
 				Status: http.StatusUnauthorized,
 			}
-		} else {
-			yall.FromContext(r.Context()).WithError(err).Error("Error decoding session")
-			return nil, &Response{
-				Errors: api.ActOfGodError,
-				Status: http.StatusInternalServerError,
-			}
+		}
+		yall.FromContext(r.Context()).WithError(err).Error("Error decoding session")
+		return nil, &Response{
+			Errors: api.ActOfGodError,
+			Status: http.StatusInternalServerError,
 		}
 	}
 	return sess, nil
