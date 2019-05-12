@@ -1,4 +1,4 @@
-package storers
+package postgres
 
 import (
 	"context"
@@ -10,38 +10,27 @@ import (
 	"os"
 	"sync"
 
-	"github.com/hashicorp/go-uuid"
+	uuid "github.com/hashicorp/go-uuid"
 	migrate "github.com/rubenv/sql-migrate"
 
 	"impractical.co/auth/accounts"
-	"impractical.co/auth/accounts/migrations"
+	"impractical.co/auth/accounts/storers/postgres/migrations"
 )
 
-func init() {
-	if os.Getenv("PG_TEST_DB") == "" {
-		return
-	}
-	storerConn, err := sql.Open("postgres", os.Getenv("PG_TEST_DB"))
-	if err != nil {
-		panic(err)
-	}
-	storerFactories = append(storerFactories, NewPostgresFactory(storerConn))
-}
-
-type PostgresFactory struct {
+type Factory struct {
 	db        *sql.DB
 	databases map[string]*sql.DB
 	lock      sync.Mutex
 }
 
-func NewPostgresFactory(db *sql.DB) *PostgresFactory {
-	return &PostgresFactory{
+func NewFactory(db *sql.DB) *Factory {
+	return &Factory{
 		db:        db,
 		databases: map[string]*sql.DB{},
 	}
 }
 
-func (p *PostgresFactory) NewStorer(ctx context.Context) (accounts.Storer, error) {
+func (p *Factory) NewStorer(ctx context.Context) (accounts.Storer, error) {
 	u, err := url.Parse(os.Getenv("PG_TEST_DB"))
 	if err != nil {
 		log.Printf("Error parsing PG_TEST_DB as a URL: %+v\n", err)
@@ -85,12 +74,12 @@ func (p *PostgresFactory) NewStorer(ctx context.Context) (accounts.Storer, error
 		return nil, err
 	}
 
-	storer := NewPostgres(ctx, newConn)
+	storer := NewStorer(ctx, newConn)
 
 	return storer, nil
 }
 
-func (p *PostgresFactory) TeardownStorers() error {
+func (p *Factory) TeardownStorers() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 

@@ -1,9 +1,6 @@
 package accounts
 
-//go:generate go-bindata -pkg migrations -o migrations/generated.go sql/
-
 import (
-	"context"
 	"errors"
 	"sort"
 	"time"
@@ -66,16 +63,6 @@ func Apply(change Change, account Account) Account {
 	return res
 }
 
-// Storer dictates how Accounts will be persisted and how to
-// interact with those persisted Accounts.
-type Storer interface {
-	Create(ctx context.Context, account Account) error
-	Get(ctx context.Context, id string) (Account, error)
-	Update(ctx context.Context, id string, change Change) error
-	Delete(ctx context.Context, id string) error
-	ListByProfile(ctx context.Context, profileID string) ([]Account, error)
-}
-
 // FillDefaults sets a reasonable default for any of the properties
 // of the specified Account that both have reasonable defaults and
 // are set to the zero value when FillDefaults is called. It returns
@@ -101,16 +88,8 @@ type Dependencies struct {
 	Storer Storer
 }
 
-type byLastUsedDesc []Account
-
-func (b byLastUsedDesc) Less(i, j int) bool { return b[i].LastUsed.After(b[j].LastUsed) }
-
-func (b byLastUsedDesc) Swap(i, j int) { b[i], b[j] = b[j], b[i] }
-
-func (b byLastUsedDesc) Len() int { return len(b) }
-
 // ByLastUsedDesc sorts the passed slice of Accounts by their LastUsed
 // property, with the most recent times at the lower indices.
 func ByLastUsedDesc(accounts []Account) {
-	sort.Sort(byLastUsedDesc(accounts))
+	sort.Slice(accounts, func(i, j int) bool { return accounts[i].LastUsed.After(accounts[j].LastUsed) })
 }

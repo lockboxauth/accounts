@@ -1,4 +1,4 @@
-package storers
+package postgres
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 	"impractical.co/auth/accounts"
 )
 
-type postgresAccount struct {
+type Account struct {
 	ID             string       `sql_column:"id"`
 	ProfileID      string       `sql_column:"profile_id"`
 	Created        time.Time    `sql_column:"created_at"`
@@ -16,7 +16,7 @@ type postgresAccount struct {
 	IsRegistration sql.NullBool `sql_column:"is_registration"`
 }
 
-func fromPostgres(a postgresAccount) accounts.Account {
+func fromPostgres(a Account) accounts.Account {
 	acct := accounts.Account{
 		ID:        a.ID,
 		ProfileID: a.ProfileID,
@@ -30,8 +30,8 @@ func fromPostgres(a postgresAccount) accounts.Account {
 	return acct
 }
 
-func toPostgres(a accounts.Account) postgresAccount {
-	return postgresAccount{
+func toPostgres(a accounts.Account) Account {
+	return Account{
 		ID:        a.ID,
 		ProfileID: a.ProfileID,
 		Created:   a.Created,
@@ -44,6 +44,6 @@ func toPostgres(a accounts.Account) postgresAccount {
 	}
 }
 
-func (p postgresAccount) GetSQLTableName() string {
+func (p Account) GetSQLTableName() string {
 	return "accounts"
 }

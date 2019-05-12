@@ -1,4 +1,4 @@
-package storers
+package memory
 
 import (
 	"context"
@@ -29,29 +29,29 @@ var (
 	}
 )
 
-// Memstore is an in-memory implementation of the Storer
+// Storer is an in-memory implementation of the Storer
 // interface.
-type Memstore struct {
+type Storer struct {
 	db *memdb.MemDB
 }
 
-// NewMemstore returns a Memstore instance that is ready
+// NewStorer returns a in-memory Storer instance that is ready
 // to be used as a Storer.
-func NewMemstore() (*Memstore, error) {
+func NewStorer() (*Storer, error) {
 	db, err := memdb.NewMemDB(schema)
 	if err != nil {
 		return nil, err
 	}
-	return &Memstore{
+	return &Storer{
 		db: db,
 	}, nil
 }
 
-// Create inserts the passed Account into the Memstore,
+// Create inserts the passed Account into the Storer,
 // returning an ErrAccountAlreadyExists error if an Account
-// with the same ID already exists in the Memstore.
-func (m *Memstore) Create(ctx context.Context, account accounts.Account) error {
-	txn := m.db.Txn(true)
+// with the same ID already exists in the Storer.
+func (s *Storer) Create(ctx context.Context, account accounts.Account) error {
+	txn := s.db.Txn(true)
 	defer txn.Abort()
 	exists, err := txn.First("account", "id", account.ID)
 	if err != nil {
@@ -78,10 +78,10 @@ func (m *Memstore) Create(ctx context.Context, account accounts.Account) error {
 }
 
 // Get retrieves the Account specified by the passed ID from
-// the Memstore, returning an ErrAccountNotFound error if no
+// the Storer, returning an ErrAccountNotFound error if no
 // Account matches the passed ID.
-func (m *Memstore) Get(ctx context.Context, id string) (accounts.Account, error) {
-	txn := m.db.Txn(false)
+func (s *Storer) Get(ctx context.Context, id string) (accounts.Account, error) {
+	txn := s.db.Txn(false)
 	account, err := txn.First("account", "id", id)
 	if err != nil {
 		return accounts.Account{}, err
@@ -93,10 +93,10 @@ func (m *Memstore) Get(ctx context.Context, id string) (accounts.Account, error)
 }
 
 // Update applies the passed Change to the Account that matches
-// the specified ID in the Memstore, if any Account matches the
-// specified ID in the Memstore.
-func (m *Memstore) Update(ctx context.Context, id string, change accounts.Change) error {
-	txn := m.db.Txn(true)
+// the specified ID in the Storer, if any Account matches the
+// specified ID in the Storer.
+func (s *Storer) Update(ctx context.Context, id string, change accounts.Change) error {
+	txn := s.db.Txn(true)
 	defer txn.Abort()
 	account, err := txn.First("account", "id", id)
 	if err != nil {
@@ -115,10 +115,10 @@ func (m *Memstore) Update(ctx context.Context, id string, change accounts.Change
 }
 
 // Delete removes the Account that matches the specified ID from
-// the Memstore, if any Account matches the specified ID in the
-// Memstore.
-func (m *Memstore) Delete(ctx context.Context, id string) error {
-	txn := m.db.Txn(true)
+// the Storer, if any Account matches the specified ID in the
+// Storer.
+func (s *Storer) Delete(ctx context.Context, id string) error {
+	txn := s.db.Txn(true)
 	defer txn.Abort()
 	exists, err := txn.First("account", "id", id)
 	if err != nil {
@@ -137,8 +137,8 @@ func (m *Memstore) Delete(ctx context.Context, id string) error {
 
 // ListByProfile returns all the Accounts associated with the passed profile ID,
 // sorted with the most recently used Accounts coming first.
-func (m *Memstore) ListByProfile(ctx context.Context, profileID string) ([]accounts.Account, error) {
-	txn := m.db.Txn(false)
+func (s *Storer) ListByProfile(ctx context.Context, profileID string) ([]accounts.Account, error) {
+	txn := s.db.Txn(false)
 	var accts []accounts.Account
 	acctIter, err := txn.Get("account", "profileID", profileID)
 	if err != nil {

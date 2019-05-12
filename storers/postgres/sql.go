@@ -1,4 +1,4 @@
-package storers
+package postgres
 
 import (
 	"context"
@@ -8,19 +8,19 @@ import (
 )
 
 func getSQL(ctx context.Context, id string) *pan.Query {
-	var account postgresAccount
+	var account Account
 	q := pan.New("SELECT " + pan.Columns(account).String() + " FROM " + pan.Table(account))
 	q.Where()
 	q.Comparison(account, "ID", "=", id)
 	return q.Flush(" ")
 }
 
-func createSQL(ctx context.Context, account postgresAccount) *pan.Query {
+func createSQL(ctx context.Context, account Account) *pan.Query {
 	return pan.Insert(account)
 }
 
 func updateSQL(ctx context.Context, id string, change accounts.Change) *pan.Query {
-	var account postgresAccount
+	var account Account
 	q := pan.New("UPDATE " + pan.Table(account) + " SET ")
 	if change.LastUsed != nil {
 		q.Comparison(account, "LastUsed", "=", *change.LastUsed)
@@ -35,7 +35,7 @@ func updateSQL(ctx context.Context, id string, change accounts.Change) *pan.Quer
 }
 
 func deleteSQL(ctx context.Context, id string) *pan.Query {
-	var account postgresAccount
+	var account Account
 	q := pan.New("DELETE FROM " + pan.Table(account))
 	q.Where()
 	q.Comparison(account, "ID", "=", id)
@@ -43,7 +43,7 @@ func deleteSQL(ctx context.Context, id string) *pan.Query {
 }
 
 func listByProfileSQL(ctx context.Context, profileID string) *pan.Query {
-	var account postgresAccount
+	var account Account
 	q := pan.New("SELECT " + pan.Columns(account).String() + " FROM " + pan.Table(account))
 	q.Where()
 	q.Comparison(account, "ProfileID", "=", profileID)
