@@ -31,13 +31,13 @@ func NewFactory(db *sql.DB) *Factory {
 }
 
 func (p *Factory) NewStorer(ctx context.Context) (accounts.Storer, error) {
-	u, err := url.Parse(os.Getenv("PG_TEST_DB"))
+	u, err := url.Parse(os.Getenv(TestConnStringEnvVar))
 	if err != nil {
-		log.Printf("Error parsing PG_TEST_DB as a URL: %+v\n", err)
+		log.Printf("Error parsing %s as a URL: %+v\n", TestConnStringEnvVar, err)
 		return nil, err
 	}
 	if u.Scheme != "postgres" {
-		return nil, errors.New("PG_TEST_DB must begin with postgres://")
+		return nil, errors.New(TestConnStringEnvVar + " must begin with postgres://")
 	}
 
 	tableSuffix, err := uuid.GenerateRandomBytes(6)
