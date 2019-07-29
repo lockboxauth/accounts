@@ -35,7 +35,7 @@ type Storer struct {
 	db *memdb.MemDB
 }
 
-// NewStorer returns a in-memory Storer instance that is ready
+// NewStorer returns an in-memory Storer instance that is ready
 // to be used as a Storer.
 func NewStorer() (*Storer, error) {
 	db, err := memdb.NewMemDB(schema)
