@@ -3,7 +3,7 @@ package memory
 import (
 	"context"
 
-	"impractical.co/auth/accounts"
+	"lockbox.dev/accounts"
 )
 
 type Factory struct{}

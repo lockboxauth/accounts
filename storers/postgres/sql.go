@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"darlinggo.co/pan"
-	"impractical.co/auth/accounts"
+
+	"lockbox.dev/accounts"
 )
 
 func getSQL(ctx context.Context, id string) *pan.Query {

@@ -3,7 +3,7 @@ package apiv1
 import (
 	"time"
 
-	"impractical.co/auth/accounts"
+	"lockbox.dev/accounts"
 )
 
 // Account is the API representation of an Account.

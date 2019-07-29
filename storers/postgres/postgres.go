@@ -5,10 +5,9 @@ import (
 	"database/sql"
 
 	"darlinggo.co/pan"
-
 	"github.com/lib/pq"
 
-	"impractical.co/auth/accounts"
+	"lockbox.dev/accounts"
 )
 
 //go:generate go-bindata -pkg migrations -o migrations/generated.go sql/

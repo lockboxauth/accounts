@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"impractical.co/auth/accounts"
+	"lockbox.dev/accounts"
 )
 
 type Account struct {

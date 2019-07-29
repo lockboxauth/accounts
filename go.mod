@@ -1,4 +1,7 @@
-module impractical.co/auth/accounts
+module lockbox.dev/accounts
+
+// TODO: use real versions of these
+replace lockbox.dev/sessions v0.0.0 => ../sessions
 
 require (
 	bitbucket.org/ww/goautoneg v0.0.0-20120707110453-75cd24fc2f2c // indirect
@@ -21,6 +24,6 @@ require (
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	google.golang.org/appengine v1.1.0 // indirect
 	gopkg.in/gorp.v1 v1.7.1 // indirect
-	impractical.co/auth/sessions v0.0.0-20180908101947-9cd90b17e6bd
+	lockbox.dev/sessions v0.0.0
 	yall.in v0.0.1
 )

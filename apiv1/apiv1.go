@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"darlinggo.co/api"
-	"impractical.co/auth/accounts"
-	"impractical.co/auth/sessions"
 	yall "yall.in"
+
+	"lockbox.dev/accounts"
+	"lockbox.dev/sessions"
 )
 
 // APIv1 holds all the information that we want to

@@ -119,7 +119,5 @@ gopkg.in/gorp.v1 v1.7.1/go.mod h1:Wo3h+DBQZIxATwftsglhdD/62zRFPhGhTiu5jUJmCaw=
 gopkg.in/russross/blackfriday.v1 v1.5.1/go.mod h1:NAEMj3mL3YDCD1Mxuzav3y8y68EZs2OnJ9xdWYLES00=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWDmTeBkI65Dw0HsyUHuEVlX15mw=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
-impractical.co/auth/sessions v0.0.0-20180908101947-9cd90b17e6bd h1:/vdAUpAAgPltCNkCDzS5AI5/yyuON/AwyRS9+ZvrtC0=
-impractical.co/auth/sessions v0.0.0-20180908101947-9cd90b17e6bd/go.mod h1:2o69jlS21uvOk4tIncTZGq1ogGq1n1Hr6nNtP1ekc/g=
 yall.in v0.0.1 h1:oQkgnFIY1GmRmWLXjat+Lt8KE/yD3PbEYP7lt71utpo=
 yall.in v0.0.1/go.mod h1:sihZtLjLdINMcMiqCZ6juYVK9XuWt1RaMwGnwGlK1ag=

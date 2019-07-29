@@ -14,9 +14,9 @@ import (
 	yall "yall.in"
 	"yall.in/colour"
 
-	"impractical.co/auth/accounts"
-	"impractical.co/auth/accounts/storers/memory"
-	"impractical.co/auth/accounts/storers/postgres"
+	"lockbox.dev/accounts"
+	"lockbox.dev/accounts/storers/memory"
+	"lockbox.dev/accounts/storers/postgres"
 )
 
 const (

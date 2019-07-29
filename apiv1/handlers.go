@@ -6,8 +6,9 @@ import (
 	"darlinggo.co/api"
 	"darlinggo.co/trout"
 	uuid "github.com/hashicorp/go-uuid"
-	"impractical.co/auth/accounts"
 	yall "yall.in"
+
+	"lockbox.dev/accounts"
 )
 
 func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {

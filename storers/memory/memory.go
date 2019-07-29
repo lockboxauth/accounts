@@ -5,7 +5,7 @@ import (
 
 	memdb "github.com/hashicorp/go-memdb"
 
-	"impractical.co/auth/accounts"
+	"lockbox.dev/accounts"
 )
 
 var (

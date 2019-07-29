@@ -13,8 +13,8 @@ import (
 	uuid "github.com/hashicorp/go-uuid"
 	migrate "github.com/rubenv/sql-migrate"
 
-	"impractical.co/auth/accounts"
-	"impractical.co/auth/accounts/storers/postgres/migrations"
+	"lockbox.dev/accounts"
+	"lockbox.dev/accounts/storers/postgres/migrations"
 )
 
 type Factory struct {
