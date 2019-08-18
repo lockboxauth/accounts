@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"darlinggo.co/api"
-	"darlinggo.co/trout"
+	"darlinggo.co/trout/v2"
 	uuid "github.com/hashicorp/go-uuid"
 	yall "yall.in"
 
