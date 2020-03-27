@@ -77,7 +77,7 @@ func (a APIv1) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 	vars := trout.RequestVars(r)
 	id := vars.Get("id")
 	if id == "" {
-		api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Param: "/id", Slug: api.RequestErrNotFound}}})
+		api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Param: "id", Slug: api.RequestErrNotFound}}})
 		return
 	}
 	account, err := a.Storer.Get(r.Context(), id)
@@ -103,7 +103,7 @@ func (a APIv1) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if sess.ProfileID != account.ProfileID {
 		api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
-			{Param: "/id", Slug: api.RequestErrAccessDenied},
+			{Param: "id", Slug: api.RequestErrAccessDenied},
 		}})
 		return
 	}
@@ -140,7 +140,7 @@ func (a APIv1) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	if sess.ProfileID != account.ProfileID {
 		api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
-			{Param: "/id", Slug: api.RequestErrAccessDenied},
+			{Param: "id", Slug: api.RequestErrAccessDenied},
 		}})
 		return
 	}
