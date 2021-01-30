@@ -1,26 +1,55 @@
 # accounts
 
-The `accounts` package encapsulates the part of the [auth system](https://impractical.co/auth) that maps the method a user logged in with to the identifier used in our systems to represent that user.
+`accounts` is a subsystem of [Lockbox](https://lockbox.dev). Its responsibility
+is to keep track of different ways a user can log in to your service.
 
-Put another way, it helps tie usernames, email addresses, Google accounts, and any future ways to login we may want to support into a single logical unit that we can think of as "a user".
+When logging in, a user may be identified by an email address, Google account,
+public key, or other identifier. The `accounts` module are how these
+identifiers get associated with a "user" in your system.
+
+## Design Goals
+
+`accounts` is meant to be a discrete subsystem in the overall
+[Lockbox](https://lockbox.dev) system. It tries to have clear boundaries of
+responsibility and limit its responsibilities to only the things that it is
+uniquely situated to do. Like all Lockbox subsystems, `accounts` is meant to be
+an interchangeable part of the system, easily replaceable. All of its
+functionality should be exposed through its API, instead of relying on other
+subsystems importing it directly.
+
+`accounts` tries to enable a user-friendly authentication experience. This
+means allowing users to register multiple ways to authenticate with a service
+and use them interchangeably, rather than asking users to remember which method
+they used when registering.
 
 ## Implementation
 
-Accounts consist of an ID, a profile ID, and some metadata. The ID is used to uniquely identify the account. We don't use a compound ID (e.g., a unique combination is of a type and ID, like "email" and "paddy@impractical.co") because one of the benefits we want from this system is for users to be able to log in with their email address or username interchangeably. To avoid confusion, it'd be best if they could enter either in a single input and the system just does The Right Thing. To do this, however, usernames and emails must be unique even when stored together.
+`accounts` is implemented largely as a datastore and access mechanism for an
+`Account` type. `Account` types just tie an `Account` ID to to a profile ID.
+Profile IDs are expected to be controlled by `accounts`--it will decide what
+new users' profile IDs are, and will not offload that responsibility to another
+system.
 
-The profile ID is a UUID, and is meaningless in the system. Its value is opaque. The only important properties it has is that it is immutable and consistent across all accounts for a shared "user".
+The IDs for `Account`s must be unique, even across different authentication
+methods. They are expected to be the same value a user would specify when
+choosing a login method--an email address, a username, etc. The intended user
+experience is that a user would enter their `Account` ID in an input box for
+email-based and username-based authentication methods, or click a separate
+button for an OAuth or OpenID login experience.
 
-### Emails and Usernames
+For email and username logins, the email or username as entered should be used
+as the `Account` ID--`accounts` will make sure to use case-insensitive
+uniqueness constraints and comparisons.
 
-Emails and usernames should be stored in the account field exactly as entered; a case-insensitive comparison will be used to match them at login time. Any input with an @ in it will be considered an email address, and so we'll try to send mail to it.
-
-### Google ID Tokens
-
-One of the ways to log into the system is using a [Google ID token](https://developers.google.com/identity/sign-in/web/backend-auth). These tokens will be validated and verified, then parsed into the user information they represent. That information provides the user's email, which will be used as the account ID as though the user had entered it themselves, got the email, and successfully entered the code/clicked the link.
+For OAuth and OpenID authentication methods, use whatever the authentication
+provider uses as an account ID, unless an email address is available, in which
+case, use that as the `Account` ID, instead. This allows users to log in using
+an email-based flow or an OAuth or OpenID flow interchangeably.
 
 ## Scope
 
-`accounts` is solely responsible for managing the connection between a user and their various ways of logging into the system. The HTTP handlers it provides are responsible for verifying the authentication and authorization of the requests made against it, which will be coming from untrusted sources.
+`accounts` is solely responsible for managing the connection between a user and
+their various ways of logging into the system.
 
 The questions `accounts` is meant to answer for the system include:
 
@@ -30,7 +59,10 @@ The questions `accounts` is meant to answer for the system include:
 
 The things `accounts` is explicitly not expected to do include:
 
-  * Actually authenticate users. That is handled by the [`grants` package](httpps://impractical.co/auth/grants).
-  * Sending any emails.
+  * Actually authenticate users. `accounts` is meant to tie an authentication
+    method to a user, not actually do the authentication.
   * Managing ACLs.
-  * Managing user profile information.
+  * Managing user profile information. Applications have specific enough needs
+    for profiles that `accounts` can't reasonably abstract them. Instead,
+    accounts just stores the profile ID for a user, which applications can then
+    use to retrieve the profile information.
