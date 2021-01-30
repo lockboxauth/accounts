@@ -1,0 +1,9 @@
+build:
+  skip: true
+changelog:
+  skip: true
+release:
+  github:
+    owner: lockboxauth 
+    name: accounts
+  prerelease: auto
