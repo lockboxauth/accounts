@@ -66,3 +66,21 @@ The things `accounts` is explicitly not expected to do include:
     for profiles that `accounts` can't reasonably abstract them. Instead,
     accounts just stores the profile ID for a user, which applications can then
     use to retrieve the profile information.
+
+## Repository Structure
+
+The base directory of the repository is used to set the logical framework and
+shared types that will be used to talk about the subsystem. This largely means
+defining types and interfaces.
+
+The storers directory contains a collection of implementations of the `Storer`
+interface, each in their own package. These packages should only have unit
+tests, if any tests. The `Storer` acceptance tests in `storer_test.go` have
+common acceptance testing for `Storer` implementations, and all `Storer`
+implementations in the storers directory should register their tests there. If
+the tests have setup requirements like databases or credentials, the tests
+should only register themselves if these credentials are found.
+
+The apiv1 directory contains the first version of the API interface. Breaking
+changes should be published in a separate apiv2 package, so that both versions
+of the API can be run simultaneously.
