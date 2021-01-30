@@ -20,11 +20,33 @@ var (
 // allowing users to have multiple identifiers that are all
 // interchangeable.
 type Account struct {
-	ID             string
-	ProfileID      string
-	Created        time.Time
-	LastUsed       time.Time
-	LastSeen       time.Time
+	// ID is a globally-unique identifier for how the user identifies
+	// themselves to your application. It is case-insensitive.
+	ID string
+
+	// ProfileID is how your application should identify the user. It is an
+	// opaque string that will be automatically generated for you.
+	ProfileID string
+
+	// Created is the time at which the Account was first registered.
+	Created time.Time
+
+	// LastUsed is the time at which the Account was last authenticated
+	// with by the user, completing the password challenge or clicking the
+	// link in the email, or however the account is authenticated.
+	LastUsed time.Time
+
+	// LastSeen is the time at which the Account was last seen acting. This
+	// is different from the time it was last authenticated; when an
+	// authentication token issued for this Account is used, LastSeen
+	// should be updated. When the Account is issued an authentication
+	// token, LastUsed and LastSeen should both be updated.
+	LastSeen time.Time
+
+	// IsRegistration should be set to true when the Account is the first
+	// Account a user is trying to register. This enables extra validation
+	// logic to ensure that ProfileIDs are unique for logical users, but
+	// that multiple Accounts can be registered to a single logical user.
 	IsRegistration bool
 }
 
