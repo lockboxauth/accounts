@@ -11,15 +11,15 @@ import (
 var (
 	schema = &memdb.DBSchema{
 		Tables: map[string]*memdb.TableSchema{
-			"account": &memdb.TableSchema{
+			"account": {
 				Name: "account",
 				Indexes: map[string]*memdb.IndexSchema{
-					"id": &memdb.IndexSchema{
+					"id": {
 						Name:    "id",
 						Unique:  true,
 						Indexer: &memdb.StringFieldIndex{Field: "ID", Lowercase: true},
 					},
-					"profileID": &memdb.IndexSchema{
+					"profileID": {
 						Name:    "profileID",
 						Indexer: &memdb.StringFieldIndex{Field: "ProfileID", Lowercase: true},
 					},
