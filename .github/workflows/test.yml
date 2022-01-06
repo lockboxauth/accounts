@@ -58,4 +58,4 @@ jobs:
       - name: Run Tests
         run: go test ./... -race -v -count=1
         env:
-          PG_TEST_DB: "postgres://lockbox:testing@localhost:5432/lockbox"
+          PG_TEST_DB: "postgres://lockbox:testing@localhost:5432/lockbox?sslmode=disable"
