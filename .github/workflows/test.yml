@@ -1,9 +1,13 @@
 name: Run Tests
 on:
   push:
+    branches:
+      - main
     paths-ignore:
       - "*.md"
-      - ".all-contributorsrc"
+  pull_request:
+    paths-ignore:
+      - "*.md"
 
 jobs:
   test:
