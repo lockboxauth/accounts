@@ -37,14 +37,6 @@ func coreAccount(account Account) accounts.Account {
 	}
 }
 
-func coreAccounts(accts []Account) []accounts.Account {
-	res := make([]accounts.Account, 0, len(accts))
-	for _, acct := range accts {
-		res = append(res, coreAccount(acct))
-	}
-	return res
-}
-
 func apiAccount(account accounts.Account) Account {
 	return Account{
 		ID:             account.ID,
@@ -62,18 +54,4 @@ func apiAccounts(accts []accounts.Account) []Account {
 		res = append(res, apiAccount(acct))
 	}
 	return res
-}
-
-func coreChange(change Change) accounts.Change {
-	return accounts.Change{
-		LastSeen: change.LastSeenAt,
-		LastUsed: change.LastUsedAt,
-	}
-}
-
-func apiChange(change accounts.Change) Change {
-	return Change{
-		LastSeenAt: change.LastSeen,
-		LastUsedAt: change.LastUsed,
-	}
 }
