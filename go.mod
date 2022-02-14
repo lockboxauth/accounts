@@ -9,7 +9,7 @@ require (
 	github.com/lib/pq v1.10.4
 	github.com/rubenv/sql-migrate v0.0.0-20200616145509-8d140a17f351
 	lockbox.dev/sessions v0.3.0
-	yall.in v0.0.7
+	yall.in v0.0.8
 )
 
 go 1.13
