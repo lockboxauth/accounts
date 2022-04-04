@@ -31,14 +31,18 @@ func logEndpoint(h http.Handler) http.Handler {
 func (a APIv1) Server(baseURL string) http.Handler {
 	var router trout.Router
 	router.SetPrefix(baseURL)
-	router.Endpoint("/").Methods("POST").
-		Handler(logEndpoint(http.HandlerFunc(a.handleCreateAccount)))
-	router.Endpoint("/").Methods("GET").
-		Handler(logEndpoint(http.HandlerFunc(a.handleListAccounts)))
-	router.Endpoint("/{id}").Methods("GET").
-		Handler(logEndpoint(http.HandlerFunc(a.handleGetAccount)))
-	router.Endpoint("/{id}").Methods("DELETE").
-		Handler(logEndpoint(http.HandlerFunc(a.handleDeleteAccount)))
+	router.Endpoint("/").Methods("POST").Handler(
+		logEndpoint(handle[Account](createAccountHandler{a})),
+	)
+	router.Endpoint("/").Methods("GET").Handler(
+		logEndpoint(handle[listAccountsRequest](listAccountsHandler{a})),
+	)
+	router.Endpoint("/{id}").Methods("GET").Handler(
+		logEndpoint(handle[getAccountRequest](getAccountHandler{a})),
+	)
+	router.Endpoint("/{id}").Methods("DELETE").Handler(
+		logEndpoint(handle[deleteAccountRequest](deleteAccountHandler{a})),
+	)
 
 	return api.NegotiateMiddleware(router)
 }

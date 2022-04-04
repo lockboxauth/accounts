@@ -3,7 +3,7 @@ package apiv1
 import (
 	"net/http"
 
-	"darlinggo.co/api"
+	"impractical.co/apidiags"
 	yall "yall.in"
 
 	"lockbox.dev/accounts"
@@ -23,31 +23,18 @@ type APIv1 struct {
 // GetAuthToken returns the access token associated
 // with the request, or a Response that should be
 // rendered if there's an error.
-func (a APIv1) GetAuthToken(r *http.Request) (*sessions.AccessToken, *Response) {
+func (a APIv1) GetAuthToken(r *http.Request, resp *Response) *sessions.AccessToken {
 	sess, err := a.Sessions.TokenFromRequest(r)
 	if err != nil {
 		if err == sessions.ErrInvalidToken {
-			return nil, &Response{
-				Errors: []api.RequestError{{
-					Header: "Authorization",
-					Slug:   api.RequestErrAccessDenied,
-				}},
-				Status: http.StatusUnauthorized,
-			}
+			resp.SetStatus(http.StatusUnauthorized)
+			resp.AddError(apidiags.CodeAccessDenied, apidiags.NewHeaderPointer("Authorization"))
+			return nil
 		}
 		yall.FromContext(r.Context()).WithError(err).Error("Error decoding session")
-		return nil, &Response{
-			Errors: api.ActOfGodError,
-			Status: http.StatusInternalServerError,
-		}
+		resp.SetStatus(http.StatusInternalServerError)
+		resp.AddError(apidiags.CodeActOfGod)
+		return nil
 	}
-	return sess, nil
-}
-
-// Response is used to encode JSON responses; it is
-// the global response format for all API responses.
-type Response struct {
-	Accounts []Account          `json:"accounts,omitempty"`
-	Errors   []api.RequestError `json:"errors,omitempty"`
-	Status   int                `json:"-"`
+	return sess
 }
