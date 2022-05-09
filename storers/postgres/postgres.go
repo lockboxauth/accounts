@@ -3,9 +3,11 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"darlinggo.co/pan"
 	"github.com/lib/pq"
+	"yall.in"
 
 	"lockbox.dev/accounts"
 )
@@ -13,6 +15,10 @@ import (
 //go:generate go-bindata -pkg migrations -o migrations/generated.go sql/
 
 const (
+	// TestConnStringEnvVar is the environment variable to use when
+	// specifying a connection string for the database to run tests
+	// against. Tests will run in their own isolated databases, not in the
+	// default database the connection string is for.
 	TestConnStringEnvVar = "PG_TEST_DB"
 )
 
@@ -24,7 +30,7 @@ type Storer struct {
 
 // NewStorer returns a Storer instance that is backed by the specified
 // *sql.DB. The returned Storer instance is ready to be used as a Storer.
-func NewStorer(ctx context.Context, conn *sql.DB) *Storer {
+func NewStorer(_ context.Context, conn *sql.DB) *Storer {
 	return &Storer{db: conn}
 }
 
@@ -38,11 +44,12 @@ func (s *Storer) Create(ctx context.Context, account accounts.Account) error {
 		return err
 	}
 	_, err = s.db.Exec(queryStr, query.Args()...)
-	if e, ok := err.(*pq.Error); ok {
-		if e.Constraint == "accounts_pkey" {
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) {
+		switch pqErr.Constraint {
+		case "accounts_pkey":
 			err = accounts.ErrAccountAlreadyExists
-		}
-		if e.Constraint == "unique_registration" {
+		case "unique_registration":
 			err = accounts.ErrProfileIDAlreadyExists
 		}
 	}
@@ -58,10 +65,11 @@ func (s *Storer) Get(ctx context.Context, id string) (accounts.Account, error) {
 	if err != nil {
 		return accounts.Account{}, err
 	}
-	rows, err := s.db.Query(queryStr, query.Args()...)
+	rows, err := s.db.Query(queryStr, query.Args()...) //nolint:sqlclosecheck // the closeRows helper isn't picked up
 	if err != nil {
 		return accounts.Account{}, err
 	}
+	defer closeRows(ctx, rows)
 	var account Account
 	for rows.Next() {
 		err = pan.Unmarshal(rows, &account)
@@ -119,10 +127,11 @@ func (s *Storer) ListByProfile(ctx context.Context, profileID string) ([]account
 	if err != nil {
 		return nil, err
 	}
-	rows, err := s.db.Query(queryStr, query.Args()...)
+	rows, err := s.db.Query(queryStr, query.Args()...) //nolint:sqlclosecheck // the closeRows helper isn't picked up
 	if err != nil {
 		return nil, err
 	}
+	defer closeRows(ctx, rows)
 	var accts []accounts.Account
 	for rows.Next() {
 		var account Account
@@ -137,4 +146,10 @@ func (s *Storer) ListByProfile(ctx context.Context, profileID string) ([]account
 	}
 	accounts.ByLastUsedDesc(accts)
 	return accts, nil
+}
+
+func closeRows(ctx context.Context, rows *sql.Rows) {
+	if err := rows.Close(); err != nil {
+		yall.FromContext(ctx).WithError(err).Error("failed to close rows")
+	}
 }

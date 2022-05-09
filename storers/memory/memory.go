@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"fmt"
 
 	memdb "github.com/hashicorp/go-memdb"
 
@@ -50,7 +51,7 @@ func NewStorer() (*Storer, error) {
 // Create inserts the passed Account into the Storer,
 // returning an ErrAccountAlreadyExists error if an Account
 // with the same ID already exists in the Storer.
-func (s *Storer) Create(ctx context.Context, account accounts.Account) error {
+func (s *Storer) Create(_ context.Context, account accounts.Account) error {
 	txn := s.db.Txn(true)
 	defer txn.Abort()
 	exists, err := txn.First("account", "id", account.ID)
@@ -80,7 +81,7 @@ func (s *Storer) Create(ctx context.Context, account accounts.Account) error {
 // Get retrieves the Account specified by the passed ID from
 // the Storer, returning an ErrAccountNotFound error if no
 // Account matches the passed ID.
-func (s *Storer) Get(ctx context.Context, id string) (accounts.Account, error) {
+func (s *Storer) Get(_ context.Context, id string) (accounts.Account, error) {
 	txn := s.db.Txn(false)
 	account, err := txn.First("account", "id", id)
 	if err != nil {
@@ -89,13 +90,17 @@ func (s *Storer) Get(ctx context.Context, id string) (accounts.Account, error) {
 	if account == nil {
 		return accounts.Account{}, accounts.ErrAccountNotFound
 	}
-	return *account.(*accounts.Account), nil
+	res, ok := account.(*accounts.Account)
+	if !ok || res == nil {
+		return accounts.Account{}, fmt.Errorf("unexpected response type %T", account) //nolint:goerr113 // no handling to do, just for display
+	}
+	return *res, nil
 }
 
 // Update applies the passed Change to the Account that matches
 // the specified ID in the Storer, if any Account matches the
 // specified ID in the Storer.
-func (s *Storer) Update(ctx context.Context, id string, change accounts.Change) error {
+func (s *Storer) Update(_ context.Context, id string, change accounts.Change) error {
 	txn := s.db.Txn(true)
 	defer txn.Abort()
 	account, err := txn.First("account", "id", id)
@@ -105,7 +110,11 @@ func (s *Storer) Update(ctx context.Context, id string, change accounts.Change) 
 	if account == nil {
 		return nil
 	}
-	updated := accounts.Apply(change, *account.(*accounts.Account))
+	res, ok := account.(*accounts.Account)
+	if !ok || res == nil {
+		return fmt.Errorf("unexpected response type %T", account) //nolint:goerr113 // no handling to do, just for display
+	}
+	updated := accounts.Apply(change, *res)
 	err = txn.Insert("account", &updated)
 	if err != nil {
 		return err
@@ -117,7 +126,7 @@ func (s *Storer) Update(ctx context.Context, id string, change accounts.Change) 
 // Delete removes the Account that matches the specified ID from
 // the Storer, if any Account matches the specified ID in the
 // Storer.
-func (s *Storer) Delete(ctx context.Context, id string) error {
+func (s *Storer) Delete(_ context.Context, id string) error {
 	txn := s.db.Txn(true)
 	defer txn.Abort()
 	exists, err := txn.First("account", "id", id)
@@ -137,7 +146,7 @@ func (s *Storer) Delete(ctx context.Context, id string) error {
 
 // ListByProfile returns all the Accounts associated with the passed profile ID,
 // sorted with the most recently used Accounts coming first.
-func (s *Storer) ListByProfile(ctx context.Context, profileID string) ([]accounts.Account, error) {
+func (s *Storer) ListByProfile(_ context.Context, profileID string) ([]accounts.Account, error) {
 	txn := s.db.Txn(false)
 	var accts []accounts.Account
 	acctIter, err := txn.Get("account", "profileID", profileID)
@@ -149,7 +158,11 @@ func (s *Storer) ListByProfile(ctx context.Context, profileID string) ([]account
 		if acct == nil {
 			break
 		}
-		accts = append(accts, *acct.(*accounts.Account))
+		res, ok := acct.(*accounts.Account)
+		if !ok || res == nil {
+			return nil, fmt.Errorf("unexpected response type %T", acct) //nolint:goerr113 // no handling to do, just for display
+		}
+		accts = append(accts, *res)
 	}
 	accounts.ByLastUsedDesc(accts)
 	return accts, nil

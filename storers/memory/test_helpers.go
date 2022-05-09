@@ -6,12 +6,15 @@ import (
 	"lockbox.dev/accounts"
 )
 
+// Factory is a generator of Storers for testing purposes.
 type Factory struct{}
 
-func (m Factory) NewStorer(ctx context.Context) (accounts.Storer, error) {
+// NewStorer creates a new, isolated, in-memory Storer for tests.
+func (Factory) NewStorer(_ context.Context) (accounts.Storer, error) { //nolint:ireturn // interface requires returning an interface
 	return NewStorer()
 }
 
-func (m Factory) TeardownStorers() error {
+// TeardownStorers does nothing and is only included to fill an interface.
+func (Factory) TeardownStorers() error {
 	return nil
 }

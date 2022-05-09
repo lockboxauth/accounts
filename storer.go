@@ -1,6 +1,8 @@
 package accounts
 
-import "context"
+import (
+	"context"
+)
 
 // Storer dictates how Accounts will be persisted and how to
 // interact with those persisted Accounts.

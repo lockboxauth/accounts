@@ -7,6 +7,8 @@ import (
 	"lockbox.dev/accounts"
 )
 
+// Account is a representation of the accounts.Account type that is suitable to
+// be stored in a PostgreSQL database.
 type Account struct {
 	ID             string       `sql_column:"id"`
 	ProfileID      string       `sql_column:"profile_id"`
@@ -16,34 +18,36 @@ type Account struct {
 	IsRegistration sql.NullBool `sql_column:"is_registration"`
 }
 
-func fromPostgres(a Account) accounts.Account {
+func fromPostgres(account Account) accounts.Account {
 	acct := accounts.Account{
-		ID:        a.ID,
-		ProfileID: a.ProfileID,
-		Created:   a.Created,
-		LastUsed:  a.LastUsed,
-		LastSeen:  a.LastSeen,
+		ID:        account.ID,
+		ProfileID: account.ProfileID,
+		Created:   account.Created,
+		LastUsed:  account.LastUsed,
+		LastSeen:  account.LastSeen,
 	}
-	if a.IsRegistration.Valid {
-		acct.IsRegistration = a.IsRegistration.Bool
+	if account.IsRegistration.Valid {
+		acct.IsRegistration = account.IsRegistration.Bool
 	}
 	return acct
 }
 
-func toPostgres(a accounts.Account) Account {
+func toPostgres(account accounts.Account) Account {
 	return Account{
-		ID:        a.ID,
-		ProfileID: a.ProfileID,
-		Created:   a.Created,
-		LastUsed:  a.LastUsed,
-		LastSeen:  a.LastSeen,
+		ID:        account.ID,
+		ProfileID: account.ProfileID,
+		Created:   account.Created,
+		LastUsed:  account.LastUsed,
+		LastSeen:  account.LastSeen,
 		IsRegistration: sql.NullBool{
-			Valid: a.IsRegistration,
-			Bool:  a.IsRegistration,
+			Valid: account.IsRegistration,
+			Bool:  account.IsRegistration,
 		},
 	}
 }
 
-func (p Account) GetSQLTableName() string {
+// GetSQLTableName returns the name of the SQL table that the data for this
+// type will be stored in.
+func (Account) GetSQLTableName() string {
 	return "accounts"
 }

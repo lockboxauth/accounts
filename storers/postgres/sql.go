@@ -8,7 +8,7 @@ import (
 	"lockbox.dev/accounts"
 )
 
-func getSQL(ctx context.Context, id string) *pan.Query {
+func getSQL(_ context.Context, id string) *pan.Query {
 	var account Account
 	q := pan.New("SELECT " + pan.Columns(account).String() + " FROM " + pan.Table(account))
 	q.Where()
@@ -16,26 +16,26 @@ func getSQL(ctx context.Context, id string) *pan.Query {
 	return q.Flush(" ")
 }
 
-func createSQL(ctx context.Context, account Account) *pan.Query {
+func createSQL(_ context.Context, account Account) *pan.Query {
 	return pan.Insert(account)
 }
 
-func updateSQL(ctx context.Context, id string, change accounts.Change) *pan.Query {
+func updateSQL(_ context.Context, id string, change accounts.Change) *pan.Query {
 	var account Account
-	q := pan.New("UPDATE " + pan.Table(account) + " SET ")
+	query := pan.New("UPDATE " + pan.Table(account) + " SET ")
 	if change.LastUsed != nil {
-		q.Comparison(account, "LastUsed", "=", *change.LastUsed)
+		query.Comparison(account, "LastUsed", "=", *change.LastUsed)
 	}
 	if change.LastSeen != nil {
-		q.Comparison(account, "LastSeen", "=", *change.LastSeen)
+		query.Comparison(account, "LastSeen", "=", *change.LastSeen)
 	}
-	q.Flush(", ")
-	q.Where()
-	q.Comparison(account, "ID", "=", id)
-	return q.Flush(" ")
+	query.Flush(", ")
+	query.Where()
+	query.Comparison(account, "ID", "=", id)
+	return query.Flush(" ")
 }
 
-func deleteSQL(ctx context.Context, id string) *pan.Query {
+func deleteSQL(_ context.Context, id string) *pan.Query {
 	var account Account
 	q := pan.New("DELETE FROM " + pan.Table(account))
 	q.Where()
@@ -43,7 +43,7 @@ func deleteSQL(ctx context.Context, id string) *pan.Query {
 	return q.Flush(" ")
 }
 
-func listByProfileSQL(ctx context.Context, profileID string) *pan.Query {
+func listByProfileSQL(_ context.Context, profileID string) *pan.Query {
 	var account Account
 	q := pan.New("SELECT " + pan.Columns(account).String() + " FROM " + pan.Table(account))
 	q.Where()

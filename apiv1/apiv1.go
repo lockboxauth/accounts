@@ -1,6 +1,7 @@
 package apiv1
 
 import (
+	"errors"
 	"net/http"
 
 	"darlinggo.co/api"
@@ -26,7 +27,7 @@ type APIv1 struct {
 func (a APIv1) GetAuthToken(r *http.Request) (*sessions.AccessToken, *Response) {
 	sess, err := a.Sessions.TokenFromRequest(r)
 	if err != nil {
-		if err == sessions.ErrInvalidToken {
+		if errors.Is(err, sessions.ErrInvalidToken) {
 			return nil, &Response{
 				Errors: []api.RequestError{{
 					Header: "Authorization",

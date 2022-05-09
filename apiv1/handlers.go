@@ -1,6 +1,7 @@
 package apiv1
 
 import (
+	"errors"
 	"net/http"
 
 	"darlinggo.co/api"
@@ -33,25 +34,13 @@ func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if account.ProfileID != "" {
-		sess, resp := a.GetAuthToken(r)
-		if resp != nil {
+		if resp := a.validateAddingAccountToProfile(r, account); resp != nil {
 			api.Encode(w, r, resp.Status, resp)
 			return
 		}
-		if sess == nil {
-			api.Encode(w, r, http.StatusUnauthorized, Response{Errors: []api.RequestError{
-				{Header: "Authorization", Slug: api.RequestErrAccessDenied},
-			}})
-			return
-		}
-		if sess.ProfileID != account.ProfileID {
-			api.Encode(w, r, http.StatusForbidden, Response{Errors: []api.RequestError{
-				{Header: "Authorization", Slug: api.RequestErrAccessDenied},
-			}})
-			return
-		}
 	} else {
-		profileID, err := uuid.GenerateUUID()
+		var profileID string
+		profileID, err = uuid.GenerateUUID()
 		if err != nil {
 			yall.FromContext(r.Context()).WithError(err).Error("error generating profile ID")
 			api.Encode(w, r, http.StatusInternalServerError, Response{Errors: api.ActOfGodError})
@@ -61,7 +50,7 @@ func (a APIv1) handleCreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	err = a.Storer.Create(r.Context(), account)
 	if err != nil {
-		if err == accounts.ErrAccountAlreadyExists {
+		if errors.Is(err, accounts.ErrAccountAlreadyExists) {
 			api.Encode(w, r, http.StatusBadRequest, Response{Errors: []api.RequestError{{Field: "/id", Slug: api.RequestErrConflict}}})
 			return
 		}
@@ -82,7 +71,7 @@ func (a APIv1) handleGetAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	account, err := a.Storer.Get(r.Context(), id)
 	if err != nil {
-		if err == accounts.ErrAccountNotFound {
+		if errors.Is(err, accounts.ErrAccountNotFound) {
 			api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Field: "/id", Slug: api.RequestErrNotFound}}})
 			return
 		}
@@ -119,7 +108,7 @@ func (a APIv1) handleDeleteAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	account, err := a.Storer.Get(r.Context(), id)
 	if err != nil {
-		if err == accounts.ErrAccountNotFound {
+		if errors.Is(err, accounts.ErrAccountNotFound) {
 			api.Encode(w, r, http.StatusNotFound, Response{Errors: []api.RequestError{{Field: "/id", Slug: api.RequestErrNotFound}}})
 			return
 		}
@@ -184,4 +173,28 @@ func (a APIv1) handleListAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	api.Encode(w, r, http.StatusOK, Response{Accounts: apiAccounts(accts)})
+}
+
+func (a APIv1) validateAddingAccountToProfile(r *http.Request, account accounts.Account) *Response {
+	sess, resp := a.GetAuthToken(r)
+	if resp != nil {
+		return nil
+	}
+	if sess == nil {
+		return &Response{
+			Status: http.StatusUnauthorized,
+			Errors: []api.RequestError{
+				{Header: "Authorization", Slug: api.RequestErrAccessDenied},
+			},
+		}
+	}
+	if sess.ProfileID != account.ProfileID {
+		return &Response{
+			Status: http.StatusForbidden,
+			Errors: []api.RequestError{
+				{Header: "Authorization", Slug: api.RequestErrAccessDenied},
+			},
+		}
+	}
+	return nil
 }
